@@ -838,56 +838,20 @@ function App() {
     setCopied('latex')
   }
 
-  async function copyImage() {
-    if (!canExport || !outputRef.current) return
-
-    const svgElement = outputRef.current.querySelector('svg')
-    if (!svgElement) return
+  async function copySvg() {
+    if (!canExport) return
 
     try {
-      const bounds = svgElement.getBoundingClientRect()
-      const serializedSvg = buildExportSvg(svgElement.outerHTML, exportBackground, customBackground)
-      const blob = new Blob([serializedSvg], { type: 'image/svg+xml;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
+      const svgBlob = new Blob([exportSvgMarkup], { type: 'image/svg+xml' })
 
-      const image = new Image()
-      await new Promise<void>((resolve, reject) => {
-        image.onload = () => resolve()
-        image.onerror = () => reject(new Error('Failed to load image'))
-        image.src = url
-      })
-
-      const scale = 2
-      const width = Math.max(1, Math.ceil(bounds.width || image.naturalWidth))
-      const height = Math.max(1, Math.ceil(bounds.height || image.naturalHeight))
-      const canvas = document.createElement('canvas')
-      const context = canvas.getContext('2d')
-
-      if (!context) {
-        URL.revokeObjectURL(url)
-        throw new Error('Canvas is not available.')
-      }
-
-      canvas.width = Math.ceil(width * scale)
-      canvas.height = Math.ceil(height * scale)
-      context.scale(scale, scale)
-      context.clearRect(0, 0, width, height)
-      context.drawImage(image, 0, 0, width, height)
-
-      URL.revokeObjectURL(url)
-
-      canvas.toBlob(async (pngBlob) => {
-        if (!pngBlob) return
-
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            'image/png': pngBlob,
-          }),
-        ])
-        setCopied('image')
-      }, 'image/png')
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'image/svg+xml': svgBlob,
+        }),
+      ])
+      setCopied('svg')
     } catch (error) {
-      console.error('Failed to copy image:', error)
+      console.error('Failed to copy SVG:', error)
     }
   }
 
@@ -1371,8 +1335,8 @@ function App() {
               <button type="button" onClick={copyLatex}>
                 {copied === 'latex' ? 'Copied' : 'Copy LaTeX'}
               </button>
-              <button type="button" onClick={copyImage} disabled={!canExport}>
-                {copied === 'image' ? 'Copied' : 'Copy Image'}
+              <button type="button" onClick={copySvg} disabled={!canExport}>
+                {copied === 'svg' ? 'Copied' : 'Copy SVG'}
               </button>
             </div>
           </div>
