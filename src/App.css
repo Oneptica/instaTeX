@@ -639,127 +639,84 @@
   position: relative;
 }
 
-.editor-frame textarea,
-.syntax-layer,
+.editor-frame .cm-editor,
 .export-output {
   width: 100%;
   min-height: 190px;
   box-sizing: border-box;
-  padding: 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font: 14px/1.62 var(--mono);
   tab-size: 2;
 }
 
-.editor-frame textarea {
-  position: relative;
-  z-index: 1;
-  resize: vertical;
-  color: transparent;
-  caret-color: var(--heading);
-  background: transparent;
-}
-
-.github-input-header + .editor-frame textarea,
-.github-input-header + .editor-frame .syntax-layer {
+.github-input-header + .editor-frame .cm-editor {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
 
-.editor-frame textarea::selection {
-  color: transparent;
-  background: rgba(0, 113, 227, 0.2);
-}
-
-.syntax-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  margin: 0;
-  overflow: hidden;
-  pointer-events: none;
-  white-space: pre-wrap;
-  word-break: break-word;
+.editor-frame .cm-editor {
   color: var(--heading);
   background: var(--input);
 }
 
-.syntax-command {
-  color: #0066cc;
-}
-
-.syntax-number {
-  color: #8a4b00;
-}
-
-.syntax-bracket {
-  color: #245a32;
-  font-weight: 600;
-}
-
-.syntax-operator {
-  color: #6b4ca0;
-}
-
-.syntax-comment {
-  color: #86868b;
-}
-
-.syntax-word,
-.syntax-plain {
-  color: var(--heading);
-}
-
-.editor-frame textarea:focus,
-.export-output:focus {
+.editor-frame .cm-editor.cm-focused {
   border-color: var(--button);
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
-.autocomplete-panel {
-  position: absolute;
-  z-index: 2;
-  width: min(360px, calc(100% - 24px));
-  overflow: hidden;
+.editor-frame .cm-scroller {
+  min-height: 188px;
+  font-family: var(--mono);
+  line-height: 1.62;
+}
+
+.editor-frame .cm-content {
+  padding: 14px;
+  caret-color: var(--heading);
+}
+
+.editor-frame .cm-line {
+  padding: 0;
+}
+
+.editor-frame .cm-tooltip {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #ffffff;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
 }
 
-.autocomplete-panel button {
-  width: 100%;
-  min-height: 34px;
-  display: grid;
-  grid-template-columns: minmax(110px, auto) 1fr;
-  gap: 12px;
-  align-items: center;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 0;
-  color: var(--heading);
-  background: transparent;
-  text-align: left;
+.editor-frame .cm-tooltip-autocomplete ul {
+  font: 13px/1.25 var(--sans);
 }
 
-.autocomplete-panel button.active,
-.autocomplete-panel button:hover {
+.editor-frame .cm-tooltip-autocomplete .cm-completionIcon {
+  display: none;
+}
+
+.editor-frame .cm-tooltip-autocomplete .cm-completionLabel {
+  color: #0066cc;
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.editor-frame .cm-tooltip-autocomplete .cm-completionDetail {
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 12px;
+}
+
+.editor-frame .cm-tooltip-autocomplete ul li[aria-selected] {
+  color: var(--heading);
   background: var(--ghost-hover);
 }
 
-.autocomplete-panel span {
-  font: 600 13px/1 var(--mono);
-}
-
-.autocomplete-panel small {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--muted);
-  font: 12px/1.2 var(--sans);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.export-output:focus {
+  border-color: var(--button);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .controls {
@@ -963,6 +920,7 @@ select:focus {
 
 .export-output {
   min-height: 96px;
+  padding: 14px;
   resize: vertical;
   color: var(--heading);
   background: var(--input);

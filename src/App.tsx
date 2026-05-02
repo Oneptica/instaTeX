@@ -1,14 +1,10 @@
-import {
-  type ChangeEvent,
-  type ClipboardEvent,
-  type KeyboardEvent,
-  type MouseEvent,
-  type UIEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { type MouseEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { type Completion, type CompletionContext, autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete'
+import { defaultKeymap, history, historyKeymap, redo, redoDepth, undo, undoDepth } from '@codemirror/commands'
+import { StreamLanguage, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
+import { EditorState } from '@codemirror/state'
+import { EditorView, drawSelection, keymap, placeholder } from '@codemirror/view'
+import { stexMath } from '@codemirror/legacy-modes/mode/stex'
 import {
   type MathJaxFont,
   type RenderOptions,
@@ -20,7 +16,6 @@ import {
   type TexShelfFormula,
   backgroundTemplates,
   colorTemplates,
-  pairedCharacters,
   sizeTemplates,
   texShelfFormulas,
   toolbarGroups,
@@ -36,11 +31,6 @@ const favoritesStorageKey = 'latexgo.favorites'
 type ExportBackground = 'transparent' | 'white' | 'black' | 'custom'
 type ExportSnippet = 'latex' | 'svg' | 'data-url' | 'html' | 'markdown' | 'mathjax'
 type AppPage = 'editor' | 'texshelf'
-
-type HighlightToken = {
-  kind: string
-  text: string
-}
 
 type AutocompleteItem = {
   label: string
@@ -97,6 +87,42 @@ const inputOptionGroups = [
   { name: 'TeX size', templates: sizeTemplates },
   { name: 'Background', templates: backgroundTemplates },
 ]
+
+function getLatexCompletions(context: CompletionContext) {
+  const match = context.matchBefore(/\\[A-Za-z]*/)
+
+  if (!match || (match.from === match.to && !context.explicit)) return null
+
+  const query = match.text.toLowerCase()
+  const seen = new Set<string>()
+  const options: Completion[] = autocompleteItems
+    .filter((item) => item.label.toLowerCase().startsWith(query))
+    .filter((item) => {
+      if (seen.has(item.label)) return false
+      seen.add(item.label)
+      return true
+    })
+    .slice(0, 8)
+    .map((item) => ({
+      label: item.label,
+      detail: item.description,
+      type: 'keyword',
+      apply(view, _completion, from, to) {
+        const firstTabStop = item.tabStops?.[0]
+
+        view.dispatch({
+          changes: { from, to, insert: item.value },
+          selection:
+            firstTabStop === undefined
+              ? { anchor: from + item.value.length }
+              : { anchor: from + firstTabStop },
+          scrollIntoView: true,
+        })
+      },
+    }))
+
+  return { from: match.from, options }
+}
 
 function slugifyAssetPart(value: string) {
   return (
@@ -260,58 +286,6 @@ function writeStoredStringArray(key: string, value: string[]) {
   }
 }
 
-function tokenizeLatex(input: string): HighlightToken[] {
-  const tokens: HighlightToken[] = []
-  let index = 0
-
-  while (index < input.length) {
-    const rest = input.slice(index)
-    const command = rest.match(/^\\[a-zA-Z]+|^\\./)
-    const number = rest.match(/^\d+(?:\.\d+)?/)
-    const word = rest.match(/^[a-zA-Z]+/)
-
-    if (rest[0] === '%') {
-      const nextLine = rest.indexOf('\n')
-      const text = nextLine === -1 ? rest : rest.slice(0, nextLine)
-
-      tokens.push({ kind: 'comment', text })
-      index += text.length
-    } else if (command) {
-      tokens.push({ kind: 'command', text: command[0] })
-      index += command[0].length
-    } else if (number) {
-      tokens.push({ kind: 'number', text: number[0] })
-      index += number[0].length
-    } else if ('{}[]()'.includes(rest[0])) {
-      tokens.push({ kind: 'bracket', text: rest[0] })
-      index += 1
-    } else if ('_^&=+-*/<>|,'.includes(rest[0])) {
-      tokens.push({ kind: 'operator', text: rest[0] })
-      index += 1
-    } else if (word) {
-      tokens.push({ kind: 'word', text: word[0] })
-      index += word[0].length
-    } else {
-      tokens.push({ kind: 'plain', text: rest[0] })
-      index += 1
-    }
-  }
-
-  return tokens
-}
-
-function getAutocompleteQuery(input: string, cursor: number) {
-  const beforeCursor = input.slice(0, cursor)
-  const match = beforeCursor.match(/\\[a-zA-Z]*$/)
-
-  if (!match) return null
-
-  return {
-    query: match[0],
-    start: cursor - match[0].length,
-  }
-}
-
 function getExportBackgroundColor(background: ExportBackground, customColor: string) {
   if (background === 'white') return '#ffffff'
   if (background === 'black') return '#000000'
@@ -402,8 +376,6 @@ function App() {
   const [currentFormulaId, setCurrentFormulaId] = useState(() => getInitialFormulaId())
   const [latex, setLatex] = useState(initialHistory[initialHistory.length - 1] ?? starterLatex)
   const [display, setDisplay] = useState(true)
-  const [allowHtml, setAllowHtml] = useState(false)
-  const [mathmlSpacing, setMathmlSpacing] = useState(false)
   const [font, setFont] = useState<MathJaxFont>('mathjax-newcm')
   const [previewSize, setPreviewSize] = useState(20)
   const [matrixType, setMatrixType] = useState('pmatrix')
@@ -419,30 +391,30 @@ function App() {
   const [historySnapshot, setHistorySnapshot] = useState(initialHistory)
   const [historyIndex, setHistoryIndex] = useState(initialHistory.length - 1)
   const [favorites, setFavorites] = useState(() => readStoredStringArray(favoritesStorageKey, []))
-  const [cursorPosition, setCursorPosition] = useState(0)
-  const [autocompletePanelPosition, setAutocompletePanelPosition] = useState({ left: 12, top: 12 })
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
   const [texShelfSearch, setTexShelfSearch] = useState('')
   const [texShelfCategory, setTexShelfCategory] = useState('All')
   const [exportBackground, setExportBackground] = useState<ExportBackground>('transparent')
   const [customBackground, setCustomBackground] = useState('#f5f5f7')
   const [snippetType, setSnippetType] = useState<ExportSnippet>('html')
   const [fileName, setFileName] = useState('latexgo-formula')
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const syntaxRef = useRef<HTMLPreElement>(null)
+  const editorFrameRef = useRef<HTMLDivElement>(null)
+  const editorViewRef = useRef<EditorView | null>(null)
   const outputRef = useRef<HTMLDivElement>(null)
   const renderIdRef = useRef(0)
+  const matrixTypeRef = useRef(matrixType)
   const historyRef = useRef(initialHistory)
   const historyIndexRef = useRef(initialHistory.length - 1)
-  const tabStopsRef = useRef<number[]>([])
-  const tabStopIndexRef = useRef(0)
   const pngScale = 2
   const exportDpi = 192
   const exportInline = true
 
+  useEffect(() => {
+    matrixTypeRef.current = matrixType
+  }, [matrixType])
+
   const renderOptions = useMemo<RenderOptions>(
-    () => ({ allowHtml, display, font, mathmlSpacing }),
-    [allowHtml, display, font, mathmlSpacing],
+    () => ({ allowHtml: false, display, font, mathmlSpacing: false }),
+    [display, font],
   )
   const canExport = svgMarkup.trim().length > 0 && !error && !isRendering
   const exportSvgMarkup = useMemo(
@@ -504,49 +476,6 @@ function App() {
     [favorites],
   )
   const isFavorite = favorites.includes(latex)
-  const highlightedTokens = useMemo(() => tokenizeLatex(latex), [latex])
-  const autocompleteQuery = useMemo(
-    () => getAutocompleteQuery(latex, cursorPosition),
-    [cursorPosition, latex],
-  )
-  const autocompleteSuggestions = useMemo(() => {
-    if (!autocompleteQuery) return []
-
-    const query = autocompleteQuery.query.toLowerCase()
-    const seen = new Set<string>()
-
-    return autocompleteItems
-      .filter((item) => item.label.toLowerCase().startsWith(query))
-      .filter((item) => {
-        if (seen.has(item.label)) return false
-        seen.add(item.label)
-        return true
-      })
-      .slice(0, 8)
-  }, [autocompleteQuery])
-
-  useEffect(() => {
-    const editor = textareaRef.current
-
-    if (!editor || !autocompleteQuery || autocompleteSuggestions.length === 0) return
-
-    const lineStart = latex.lastIndexOf('\n', autocompleteQuery.start - 1) + 1
-    const lineText = latex.slice(lineStart, autocompleteQuery.start)
-    const lineIndex = latex.slice(0, autocompleteQuery.start).split('\n').length - 1
-    const computedStyle = window.getComputedStyle(editor)
-    const fontSize = Number.parseFloat(computedStyle.fontSize) || 14
-    const lineHeight = Number.parseFloat(computedStyle.lineHeight) || fontSize * 1.62
-    const paddingLeft = Number.parseFloat(computedStyle.paddingLeft) || 0
-    const paddingTop = Number.parseFloat(computedStyle.paddingTop) || 0
-    const charWidth = fontSize * 0.62
-    const left = paddingLeft + lineText.length * charWidth - editor.scrollLeft
-    const top = paddingTop + (lineIndex + 1) * lineHeight - editor.scrollTop + 4
-
-    setAutocompletePanelPosition({
-      left: Math.max(8, Math.min(left, editor.clientWidth - 240)),
-      top: Math.max(8, top),
-    })
-  }, [autocompleteQuery, autocompleteSuggestions.length, latex])
   const exportSnippet = useMemo(() => {
     const blockStart = exportInline ? '' : '<p>'
     const blockEnd = exportInline ? '' : '</p>'
@@ -580,11 +509,16 @@ function App() {
   }, [])
 
   function syncHistoryState() {
-    setCanUndo(historyIndexRef.current > 0)
-    setCanRedo(historyIndexRef.current < historyRef.current.length - 1)
     setHistorySnapshot([...historyRef.current])
     setHistoryIndex(historyIndexRef.current)
     writeStoredStringArray(historyStorageKey, historyRef.current)
+  }
+
+  function syncEditorUndoState() {
+    const editor = editorViewRef.current
+
+    setCanUndo(editor ? undoDepth(editor.state) > 0 : false)
+    setCanRedo(editor ? redoDepth(editor.state) > 0 : false)
   }
 
   function pushHistory(nextLatex: string) {
@@ -605,11 +539,17 @@ function App() {
 
   function focusEditor(selectionStart?: number, selectionEnd = selectionStart) {
     window.requestAnimationFrame(() => {
-      textareaRef.current?.focus()
+      const editor = editorViewRef.current
 
-      if (selectionStart !== undefined && selectionEnd !== undefined) {
-        textareaRef.current?.setSelectionRange(selectionStart, selectionEnd)
-        setCursorPosition(selectionStart)
+      if (!editor) return
+
+      editor.focus()
+
+      if (selectionStart !== undefined) {
+        editor.dispatch({
+          selection: { anchor: selectionStart, head: selectionEnd ?? selectionStart },
+          scrollIntoView: true,
+        })
       }
     })
   }
@@ -620,42 +560,43 @@ function App() {
     selectionEnd = selectionStart,
     tabStops: number[] = [],
   ) {
-    setLatex(nextLatex)
-    pushHistory(nextLatex)
-    tabStopsRef.current = tabStops
-    tabStopIndexRef.current = tabStops.length > 0 ? 0 : -1
-    focusEditor(selectionStart, selectionEnd)
+    const editor = editorViewRef.current
+
+    if (!editor) {
+      setLatex(nextLatex)
+      pushHistory(nextLatex)
+      return
+    }
+
+    editor.dispatch({
+      changes: { from: 0, to: editor.state.doc.length, insert: nextLatex },
+      selection:
+        selectionStart === undefined
+          ? undefined
+          : { anchor: selectionStart, head: selectionEnd ?? selectionStart },
+      scrollIntoView: true,
+    })
+
+    if (tabStops.length > 0) focusEditor(tabStops[0])
   }
 
   function undoLatex() {
-    if (historyIndexRef.current <= 0) return
+    const editor = editorViewRef.current
 
-    historyIndexRef.current -= 1
-    setLatex(historyRef.current[historyIndexRef.current])
-    tabStopsRef.current = []
-    tabStopIndexRef.current = -1
-    syncHistoryState()
-    focusEditor()
+    if (editor) undo(editor)
   }
 
   function redoLatex() {
-    if (historyIndexRef.current >= historyRef.current.length - 1) return
+    const editor = editorViewRef.current
 
-    historyIndexRef.current += 1
-    setLatex(historyRef.current[historyIndexRef.current])
-    tabStopsRef.current = []
-    tabStopIndexRef.current = -1
-    syncHistoryState()
-    focusEditor()
+    if (editor) redo(editor)
   }
 
   function restoreHistory(index: number) {
     if (!historyRef.current[index]) return
 
     historyIndexRef.current = index
-    setLatex(historyRef.current[index])
-    tabStopsRef.current = []
-    tabStopIndexRef.current = -1
+    updateLatex(historyRef.current[index])
     syncHistoryState()
     focusEditor()
   }
@@ -702,9 +643,10 @@ function App() {
   }
 
   function insertTemplate(template: LatexTemplate) {
-    const editor = textareaRef.current
-    const selectionStart = editor?.selectionStart ?? latex.length
-    const selectionEnd = editor?.selectionEnd ?? latex.length
+    const editor = editorViewRef.current
+    const selection = editor?.state.selection.main
+    const selectionStart = selection?.from ?? latex.length
+    const selectionEnd = selection?.to ?? latex.length
     const selectedText = latex.slice(selectionStart, selectionEnd)
     const suffix = template.suffix ?? ''
     const nextLatex =
@@ -766,61 +708,14 @@ function App() {
     closeMenuFromClick(event)
   }
 
-  function handleLatexChange(event: ChangeEvent<HTMLTextAreaElement>) {
-    const nextLatex = event.target.value
-
-    setCursorPosition(event.target.selectionStart)
-    setActiveSuggestionIndex(0)
-
-    if (tabStopsRef.current.length > 0) {
-      const activeTabStop = tabStopIndexRef.current
-      const nextCursorPosition = event.target.selectionStart
-      const lengthDelta = nextLatex.length - latex.length
-
-      tabStopsRef.current = tabStopsRef.current.map((tabStop, index) => {
-        if (index < activeTabStop) return tabStop
-        if (index === activeTabStop) return nextCursorPosition
-        return tabStop + lengthDelta
-      })
-
-      setLatex(nextLatex)
-      pushHistory(nextLatex)
-      return
-    }
-
-    updateLatex(nextLatex)
-  }
-
-  function handleEditorScroll(event: UIEvent<HTMLTextAreaElement>) {
-    if (!syntaxRef.current) return
-
-    syntaxRef.current.scrollTop = event.currentTarget.scrollTop
-    syntaxRef.current.scrollLeft = event.currentTarget.scrollLeft
-  }
-
-  function handleEditorSelect(event: UIEvent<HTMLTextAreaElement>) {
-    setCursorPosition(event.currentTarget.selectionStart)
-  }
-
-  function acceptSuggestion(suggestion: AutocompleteItem) {
-    if (!autocompleteQuery) return
-
-    const nextLatex =
-      latex.slice(0, autocompleteQuery.start) + suggestion.value + latex.slice(cursorPosition)
-    const tabStops = suggestion.tabStops?.map((tabStop) => autocompleteQuery.start + tabStop) ?? []
-    const nextCursor = tabStops[0] ?? autocompleteQuery.start + suggestion.value.length
-
-    setActiveSuggestionIndex(0)
-    updateLatex(nextLatex, nextCursor, nextCursor, tabStops)
-  }
-
   function jumpToStructure(direction: 'left' | 'right') {
-    const editor = textareaRef.current
+    const editor = editorViewRef.current
 
     if (!editor) return false
 
-    const stops = getNavigationStops(latex)
-    const current = editor.selectionStart
+    const currentLatex = editor.state.doc.toString()
+    const stops = getNavigationStops(currentLatex)
+    const current = editor.state.selection.main.head
     const nextStop =
       direction === 'right'
         ? stops.find((stop) => stop > current)
@@ -832,96 +727,95 @@ function App() {
     return true
   }
 
-  function handleEditorKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    const key = event.key.toLowerCase()
+  useEffect(() => {
+    if (!editorFrameRef.current || editorViewRef.current) return
 
-    if (autocompleteSuggestions.length > 0) {
-      if (key === 'arrowdown') {
-        event.preventDefault()
-        setActiveSuggestionIndex((index) => Math.min(index + 1, autocompleteSuggestions.length - 1))
-        return
-      }
+    const editor = new EditorView({
+      parent: editorFrameRef.current,
+      state: EditorState.create({
+        doc: latex,
+        extensions: [
+          history(),
+          closeBrackets(),
+          drawSelection(),
+          placeholder(''),
+          StreamLanguage.define(stexMath),
+          syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+          autocompletion({
+            override: [getLatexCompletions],
+            activateOnTyping: true,
+          }),
+          keymap.of([
+            {
+              key: 'Mod-ArrowRight',
+              run() {
+                return jumpToStructure('right')
+              },
+            },
+            {
+              key: 'Mod-ArrowLeft',
+              run() {
+                return jumpToStructure('left')
+              },
+            },
+            ...closeBracketsKeymap,
+            ...completionKeymap,
+            ...historyKeymap,
+            ...defaultKeymap,
+          ]),
+          EditorView.domEventHandlers({
+            paste(event, view) {
+              const text = event.clipboardData?.getData('text/plain') ?? ''
+              const matrix = tableTextToLatex(text, matrixTypeRef.current)
 
-      if (key === 'arrowup') {
-        event.preventDefault()
-        setActiveSuggestionIndex((index) => Math.max(index - 1, 0))
-        return
-      }
+              if (!matrix) return false
 
-      if (key === 'enter') {
-        event.preventDefault()
-        acceptSuggestion(autocompleteSuggestions[activeSuggestionIndex])
-        return
-      }
+              event.preventDefault()
+              const selection = view.state.selection.main
+
+              view.dispatch({
+                changes: { from: selection.from, to: selection.to, insert: matrix },
+                selection: { anchor: selection.from + matrix.length },
+                scrollIntoView: true,
+              })
+              return true
+            },
+          }),
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged) {
+              const nextLatex = update.state.doc.toString()
+
+              setLatex(nextLatex)
+              pushHistory(nextLatex)
+            }
+
+            if (update.docChanged || update.transactions.some((transaction) => transaction.selection)) {
+              syncEditorUndoState()
+            }
+          }),
+        ],
+      }),
+    })
+
+    editorViewRef.current = editor
+    syncEditorUndoState()
+
+    return () => {
+      editor.destroy()
+      editorViewRef.current = null
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-    if ((event.ctrlKey || event.metaKey) && key === 'arrowright') {
-      if (jumpToStructure('right')) event.preventDefault()
-      return
-    }
+  useEffect(() => {
+    const editor = editorViewRef.current
 
-    if ((event.ctrlKey || event.metaKey) && key === 'arrowleft') {
-      if (jumpToStructure('left')) event.preventDefault()
-      return
-    }
+    if (!editor || editor.state.doc.toString() === latex) return
 
-    if (key === 'tab' && tabStopsRef.current.length > 0) {
-      event.preventDefault()
-
-      const nextIndex =
-        event.shiftKey && tabStopIndexRef.current > 0
-          ? tabStopIndexRef.current - 1
-          : Math.min(tabStopIndexRef.current + 1, tabStopsRef.current.length - 1)
-
-      tabStopIndexRef.current = nextIndex
-      focusEditor(tabStopsRef.current[nextIndex])
-      return
-    }
-
-    if ((event.ctrlKey || event.metaKey) && key === 'z' && !event.shiftKey) {
-      event.preventDefault()
-      undoLatex()
-      return
-    }
-
-    if ((event.ctrlKey || event.metaKey) && (key === 'y' || (key === 'z' && event.shiftKey))) {
-      event.preventDefault()
-      redoLatex()
-      return
-    }
-
-    if (event.altKey || event.ctrlKey || event.metaKey) return
-
-    const closingCharacter = pairedCharacters[event.key]
-
-    if (!closingCharacter) return
-
-    event.preventDefault()
-
-    const editor = event.currentTarget
-    const selectionStart = editor.selectionStart
-    const selectionEnd = editor.selectionEnd
-    const selectedText = latex.slice(selectionStart, selectionEnd)
-    const nextLatex =
-      latex.slice(0, selectionStart) +
-      event.key +
-      selectedText +
-      closingCharacter +
-      latex.slice(selectionEnd)
-    const cursorPosition = selectionStart + event.key.length + selectedText.length
-
-    updateLatex(nextLatex, cursorPosition)
-  }
-
-  function handleEditorPaste(event: ClipboardEvent<HTMLTextAreaElement>) {
-    const text = event.clipboardData.getData('text/plain')
-    const matrix = tableTextToLatex(text, matrixType)
-
-    if (!matrix) return
-
-    event.preventDefault()
-    insertTemplate({ label: 'Pasted table', prefix: matrix })
-  }
+    editor.dispatch({
+      changes: { from: 0, to: editor.state.doc.length, insert: latex },
+    })
+  }, [latex])
 
   async function renderFormula(nextOptions = renderOptions) {
     if (!outputRef.current) return
@@ -1071,20 +965,6 @@ function App() {
     const nextOptions = { ...renderOptions, display: value }
 
     setDisplay(value)
-    renderFormula(nextOptions)
-  }
-
-  function updateAllowHtml(value: boolean) {
-    const nextOptions = { ...renderOptions, allowHtml: value }
-
-    setAllowHtml(value)
-    renderFormula(nextOptions)
-  }
-
-  function updateMathmlSpacing(value: boolean) {
-    const nextOptions = { ...renderOptions, mathmlSpacing: value }
-
-    setMathmlSpacing(value)
     renderFormula(nextOptions)
   }
 
@@ -1386,55 +1266,7 @@ function App() {
           ))}
         </div>
 
-        <div className="editor-frame">
-          <pre ref={syntaxRef} className="syntax-layer" aria-hidden="true">
-            {highlightedTokens.map((token, index) => (
-              <span className={`syntax-${token.kind}`} key={`${token.kind}-${index}`}>
-                {token.text}
-              </span>
-            ))}
-          </pre>
-          <textarea
-            ref={textareaRef}
-            id="latex-input"
-            value={latex}
-            onChange={handleLatexChange}
-            onKeyDown={handleEditorKeyDown}
-            onPaste={handleEditorPaste}
-            onScroll={handleEditorScroll}
-            onSelect={handleEditorSelect}
-            onClick={handleEditorSelect}
-            onKeyUp={handleEditorSelect}
-            spellCheck={false}
-          />
-          {autocompleteSuggestions.length > 0 ? (
-            <div
-              className="autocomplete-panel"
-              role="listbox"
-              style={{
-                left: `${autocompletePanelPosition.left}px`,
-                top: `${autocompletePanelPosition.top}px`,
-              }}
-            >
-              {autocompleteSuggestions.map((suggestion, index) => (
-                <button
-                  className={index === activeSuggestionIndex ? 'active' : ''}
-                  key={`${suggestion.label}-${suggestion.value}`}
-                  type="button"
-                  onMouseDown={(event) => {
-                    event.preventDefault()
-                    acceptSuggestion(suggestion)
-                  }}
-                  role="option"
-                  aria-selected={index === activeSuggestionIndex}
-                >
-                  <span>{suggestion.label}</span>
-                  <small>{suggestion.description}</small>
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
+        <div className="editor-frame" id="latex-input" ref={editorFrameRef} />
 
         <section className="preview-pane" aria-label="Rendered formula preview">
           <div className="preview-surface">
@@ -1468,22 +1300,6 @@ function App() {
                 onChange={(event) => updateDisplay(event.target.checked)}
               />
               Display style
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={allowHtml}
-                onChange={(event) => updateAllowHtml(event.target.checked)}
-              />
-              Allow HTML in TeX
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={mathmlSpacing}
-                onChange={(event) => updateMathmlSpacing(event.target.checked)}
-              />
-              MathML spacing
             </label>
             <label className="font-control" htmlFor="font-select">
               Font
