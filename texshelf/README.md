@@ -16,8 +16,7 @@ Each JSON file contains an array of entries:
   "subcategory": "Equations",
   "latex": "x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}",
   "description": "Solution of ax^2+bx+c=0.",
-  "tags": ["algebra", "equation"],
-  "level": "school"
+  "tags": ["algebra", "equation"]
 }
 ```
 
@@ -33,7 +32,6 @@ Optional fields:
 
 - `subcategory`: narrower topic
 - `description`: short context
-- `level`: `school`, `undergraduate`, `graduate`, or `reference`
 - `source`: public-domain or contributor-written reference note
 
 ## Contribution Rules

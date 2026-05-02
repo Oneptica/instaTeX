@@ -6,8 +6,11 @@
     "subcategory": "Reactions",
     "latex": "\\ce{CO2 + C -> 2 CO}",
     "description": "Carbon dioxide reacts with carbon to form carbon monoxide.",
-    "tags": ["chemistry", "reaction", "mhchem"],
-    "level": "school"
+    "tags": [
+      "chemistry",
+      "reaction",
+      "mhchem"
+    ]
   },
   {
     "id": "haber-process",
@@ -16,8 +19,11 @@
     "subcategory": "Equilibrium",
     "latex": "\\ce{N2 + 3H2 <=> 2NH3}",
     "description": "Nitrogen and hydrogen in equilibrium with ammonia.",
-    "tags": ["chemistry", "equilibrium", "mhchem"],
-    "level": "school"
+    "tags": [
+      "chemistry",
+      "equilibrium",
+      "mhchem"
+    ]
   },
   {
     "id": "methane-combustion",
@@ -26,8 +32,11 @@
     "subcategory": "Reactions",
     "latex": "\\ce{CH4 + 2O2 -> CO2 + 2H2O}",
     "description": "Complete combustion of methane.",
-    "tags": ["chemistry", "combustion", "mhchem"],
-    "level": "school"
+    "tags": [
+      "chemistry",
+      "combustion",
+      "mhchem"
+    ]
   },
   {
     "id": "silver-chloride-precipitation",
@@ -36,8 +45,12 @@
     "subcategory": "Ionic Reactions",
     "latex": "\\ce{Ag+ + Cl- -> AgCl v}",
     "description": "Precipitation reaction forming silver chloride.",
-    "tags": ["chemistry", "ions", "precipitation", "mhchem"],
-    "level": "school"
+    "tags": [
+      "chemistry",
+      "ions",
+      "precipitation",
+      "mhchem"
+    ]
   },
   {
     "id": "water-autoionization",
@@ -46,8 +59,12 @@
     "subcategory": "Equilibrium",
     "latex": "\\ce{2H2O <=> H3O+ + OH-}",
     "description": "Autoionization equilibrium of water.",
-    "tags": ["chemistry", "equilibrium", "water", "mhchem"],
-    "level": "school"
+    "tags": [
+      "chemistry",
+      "equilibrium",
+      "water",
+      "mhchem"
+    ]
   },
   {
     "id": "acid-base-neutralization",
@@ -56,7 +73,11 @@
     "subcategory": "Ionic Reactions",
     "latex": "\\ce{H+ + OH- -> H2O}",
     "description": "Net ionic equation for strong acid-base neutralization.",
-    "tags": ["chemistry", "acid-base", "ions", "mhchem"],
-    "level": "school"
+    "tags": [
+      "chemistry",
+      "acid-base",
+      "ions",
+      "mhchem"
+    ]
   }
 ]

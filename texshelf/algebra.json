@@ -6,8 +6,11 @@
     "subcategory": "Equations",
     "latex": "x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}",
     "description": "Solution of ax^2+bx+c=0.",
-    "tags": ["algebra", "equation", "polynomial"],
-    "level": "school"
+    "tags": [
+      "algebra",
+      "equation",
+      "polynomial"
+    ]
   },
   {
     "id": "binomial-theorem",
@@ -16,8 +19,11 @@
     "subcategory": "Expansion",
     "latex": "(x+y)^n=\\sum_{k=0}^{n}\\binom{n}{k}x^{n-k}y^k",
     "description": "Finite expansion of a binomial power.",
-    "tags": ["algebra", "sum", "binomial"],
-    "level": "school"
+    "tags": [
+      "algebra",
+      "sum",
+      "binomial"
+    ]
   },
   {
     "id": "piecewise-absolute-value",
@@ -26,8 +32,11 @@
     "subcategory": "Piecewise",
     "latex": "|x| = \\left\\{ \\begin{array}{cl}\nx & : \\ x \\geq 0 \\\\\n-x & : \\ x < 0\n\\end{array} \\right.",
     "description": "Absolute value as a piecewise function.",
-    "tags": ["algebra", "piecewise", "absolute-value"],
-    "level": "school"
+    "tags": [
+      "algebra",
+      "piecewise",
+      "absolute-value"
+    ]
   },
   {
     "id": "cases-function",
@@ -36,8 +45,11 @@
     "subcategory": "Piecewise",
     "latex": "f(x)=\\begin{cases}\nx^2, & x \\geq 0 \\\\\n-x, & x < 0\n\\end{cases}",
     "description": "Reusable cases environment example.",
-    "tags": ["algebra", "piecewise", "cases"],
-    "level": "school"
+    "tags": [
+      "algebra",
+      "piecewise",
+      "cases"
+    ]
   },
   {
     "id": "linear-system",
@@ -46,8 +58,11 @@
     "subcategory": "Systems",
     "latex": "\\left\\{\n\\begin{array}{rcl}\n2x+y&=&5 \\\\\nx-y&=&1\n\\end{array}\n\\right.",
     "description": "Two-equation linear system.",
-    "tags": ["algebra", "system", "linear"],
-    "level": "school"
+    "tags": [
+      "algebra",
+      "system",
+      "linear"
+    ]
   },
   {
     "id": "aligned-steps",
@@ -56,8 +71,11 @@
     "subcategory": "Layout",
     "latex": "\\begin{array}{rcl}\nA & = & B \\\\\n  & = & C \\\\\n  & = & D\n\\end{array}",
     "description": "Multi-line derivation layout.",
-    "tags": ["algebra", "derivation", "layout"],
-    "level": "reference"
+    "tags": [
+      "algebra",
+      "derivation",
+      "layout"
+    ]
   },
   {
     "id": "aligned-with-rule",
@@ -66,8 +84,11 @@
     "subcategory": "Layout",
     "latex": "\\begin{array}{rcl}\nx+y&=&10 \\\\\nx-y&=&4 \\\\\n\\hline\n2x&=&14\n\\end{array}",
     "description": "Aligned equations with a separator rule.",
-    "tags": ["algebra", "layout", "system"],
-    "level": "reference"
+    "tags": [
+      "algebra",
+      "layout",
+      "system"
+    ]
   },
   {
     "id": "right-brace-note",
@@ -76,8 +97,11 @@
     "subcategory": "Layout",
     "latex": "\\left.\n\\begin{array}{rcl}\na+b&=&c \\\\\nd+e&=&f\n\\end{array}\n\\right\\}\n\\quad \\text{conditions}",
     "description": "Equations grouped with a right-side brace note.",
-    "tags": ["algebra", "brace", "annotation"],
-    "level": "reference"
+    "tags": [
+      "algebra",
+      "brace",
+      "annotation"
+    ]
   },
   {
     "id": "determinant-two-by-two",
@@ -86,8 +110,11 @@
     "subcategory": "Determinants",
     "latex": "\\begin{vmatrix}\na & b \\\\\nc & d\n\\end{vmatrix}=ad-bc",
     "description": "Closed form for a 2 by 2 determinant.",
-    "tags": ["linear-algebra", "determinant", "matrix"],
-    "level": "undergraduate"
+    "tags": [
+      "linear-algebra",
+      "determinant",
+      "matrix"
+    ]
   },
   {
     "id": "euclidean-norm",
@@ -96,8 +123,11 @@
     "subcategory": "Vector Norms",
     "latex": "\\left\\|\\mathbf{x}\\right\\|_2=\\sqrt{x_1^2+x_2^2+\\cdots+x_n^2}",
     "description": "Euclidean norm of an n-dimensional vector.",
-    "tags": ["linear-algebra", "vector", "norm"],
-    "level": "undergraduate"
+    "tags": [
+      "linear-algebra",
+      "vector",
+      "norm"
+    ]
   },
   {
     "id": "matrix-vector-product",
@@ -106,7 +136,10 @@
     "subcategory": "Matrices",
     "latex": "\\mathbf{A}\\mathbf{x}=\\begin{bmatrix}\na_{11} & a_{12} \\\\\na_{21} & a_{22}\n\\end{bmatrix}\\begin{bmatrix}\nx_1 \\\\\nx_2\n\\end{bmatrix}",
     "description": "A compact 2 by 2 matrix-vector product.",
-    "tags": ["linear-algebra", "matrix", "vector"],
-    "level": "undergraduate"
+    "tags": [
+      "linear-algebra",
+      "matrix",
+      "vector"
+    ]
   }
 ]

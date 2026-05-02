@@ -6,8 +6,11 @@
     "subcategory": "Series",
     "latex": "\\sum_{\\substack{\n0 < i < m \\\\\n0 < j < n\n}} P(i,j)",
     "description": "Summation with stacked constraints.",
-    "tags": ["calculus", "sum", "series"],
-    "level": "undergraduate"
+    "tags": [
+      "calculus",
+      "sum",
+      "series"
+    ]
   },
   {
     "id": "fourier-transform",
@@ -16,8 +19,11 @@
     "subcategory": "Transforms",
     "latex": "\\hat{f}(\\xi)=\\int_{-\\infty}^{\\infty} f(x)e^{-2\\pi i x \\xi}\\,dx",
     "description": "A common Fourier transform convention.",
-    "tags": ["calculus", "integral", "fourier"],
-    "level": "undergraduate"
+    "tags": [
+      "calculus",
+      "integral",
+      "fourier"
+    ]
   },
   {
     "id": "ordinary-and-partial-derivatives",
@@ -26,8 +32,11 @@
     "subcategory": "Derivatives",
     "latex": "\\dv{x}{t} = v,\\qquad \\pdv{u}{t} = \\alpha \\pdv[2]{u}{x}",
     "description": "Physics-style derivative notation.",
-    "tags": ["calculus", "derivative", "partial"],
-    "level": "undergraduate"
+    "tags": [
+      "calculus",
+      "derivative",
+      "partial"
+    ]
   },
   {
     "id": "wave-equation",
@@ -36,8 +45,11 @@
     "subcategory": "Partial Differential Equations",
     "latex": "\\pdv[2]{u}{t}=c^2\\pdv[2]{u}{x}",
     "description": "One-dimensional wave equation.",
-    "tags": ["calculus", "pde", "wave"],
-    "level": "undergraduate"
+    "tags": [
+      "calculus",
+      "pde",
+      "wave"
+    ]
   },
   {
     "id": "normal-distribution",
@@ -46,8 +58,11 @@
     "subcategory": "Distributions",
     "latex": "f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}",
     "description": "Probability density of a normal distribution.",
-    "tags": ["probability", "statistics", "distribution"],
-    "level": "undergraduate"
+    "tags": [
+      "probability",
+      "statistics",
+      "distribution"
+    ]
   },
   {
     "id": "bayes-theorem",
@@ -56,8 +71,11 @@
     "subcategory": "Conditional Probability",
     "latex": "P(A\\mid B)=\\frac{P(B\\mid A)P(A)}{P(B)}",
     "description": "Bayes theorem for conditional probability.",
-    "tags": ["probability", "bayes", "conditional"],
-    "level": "undergraduate"
+    "tags": [
+      "probability",
+      "bayes",
+      "conditional"
+    ]
   },
   {
     "id": "covariance",
@@ -66,8 +84,11 @@
     "subcategory": "Statistics",
     "latex": "\\operatorname{Cov}(X,Y)=E\\left[(X-E[X])(Y-E[Y])\\right]",
     "description": "Covariance of two random variables.",
-    "tags": ["probability", "statistics", "covariance"],
-    "level": "undergraduate"
+    "tags": [
+      "probability",
+      "statistics",
+      "covariance"
+    ]
   },
   {
     "id": "fundamental-theorem-calculus",
@@ -76,8 +97,11 @@
     "subcategory": "Integrals",
     "latex": "\\int_a^b f'(x)\\,dx=f(b)-f(a)",
     "description": "Integral of a derivative over an interval.",
-    "tags": ["calculus", "integral", "derivative"],
-    "level": "undergraduate"
+    "tags": [
+      "calculus",
+      "integral",
+      "derivative"
+    ]
   },
   {
     "id": "taylor-series",
@@ -86,8 +110,11 @@
     "subcategory": "Series",
     "latex": "f(x)=\\sum_{n=0}^{\\infty}\\frac{f^{(n)}(a)}{n!}(x-a)^n",
     "description": "Taylor expansion of a smooth function around a point.",
-    "tags": ["calculus", "series", "taylor"],
-    "level": "undergraduate"
+    "tags": [
+      "calculus",
+      "series",
+      "taylor"
+    ]
   },
   {
     "id": "gradient-definition",
@@ -96,7 +123,10 @@
     "subcategory": "Vector Calculus",
     "latex": "\\nabla f=\\left(\\pdv{f}{x_1},\\pdv{f}{x_2},\\ldots,\\pdv{f}{x_n}\\right)",
     "description": "Gradient of a scalar field.",
-    "tags": ["calculus", "vector-calculus", "gradient"],
-    "level": "undergraduate"
+    "tags": [
+      "calculus",
+      "vector-calculus",
+      "gradient"
+    ]
   }
 ]

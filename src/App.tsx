@@ -34,7 +34,6 @@ const historyStorageKey = 'latexgo.history'
 const favoritesStorageKey = 'latexgo.favorites'
 
 type ExportBackground = 'transparent' | 'white' | 'black' | 'custom'
-type ExportFormat = 'svg' | 'png'
 type ExportSnippet = 'latex' | 'svg' | 'data-url' | 'html' | 'markdown' | 'mathjax'
 type AppPage = 'editor' | 'texshelf'
 
@@ -48,16 +47,6 @@ type AutocompleteItem = {
   value: string
   description: string
   tabStops?: number[]
-}
-
-type ExportPreset = {
-  label: string
-  background: ExportBackground
-  format: ExportFormat
-  scale: number
-  dpi: number
-  snippet: ExportSnippet
-  inline: boolean
 }
 
 function getInitialPage(): AppPage {
@@ -101,45 +90,6 @@ const exportBackgrounds: { label: string; value: ExportBackground }[] = [
   { label: 'White', value: 'white' },
   { label: 'Black', value: 'black' },
   { label: 'Custom', value: 'custom' },
-]
-
-const exportPresets: ExportPreset[] = [
-  {
-    label: 'Transparent SVG',
-    background: 'transparent',
-    format: 'svg',
-    scale: 1,
-    dpi: 96,
-    snippet: 'svg',
-    inline: true,
-  },
-  {
-    label: 'White PNG 2x',
-    background: 'white',
-    format: 'png',
-    scale: 2,
-    dpi: 192,
-    snippet: 'html',
-    inline: true,
-  },
-  {
-    label: 'Markdown',
-    background: 'transparent',
-    format: 'svg',
-    scale: 1,
-    dpi: 96,
-    snippet: 'markdown',
-    inline: true,
-  },
-  {
-    label: 'HTML Block',
-    background: 'white',
-    format: 'svg',
-    scale: 1,
-    dpi: 96,
-    snippet: 'html',
-    inline: false,
-  },
 ]
 
 const inputOptionGroups = [
@@ -470,16 +420,12 @@ function App() {
   const [historyIndex, setHistoryIndex] = useState(initialHistory.length - 1)
   const [favorites, setFavorites] = useState(() => readStoredStringArray(favoritesStorageKey, []))
   const [cursorPosition, setCursorPosition] = useState(0)
+  const [autocompletePanelPosition, setAutocompletePanelPosition] = useState({ left: 12, top: 12 })
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
   const [texShelfSearch, setTexShelfSearch] = useState('')
   const [texShelfCategory, setTexShelfCategory] = useState('All')
-  const [texShelfLevel, setTexShelfLevel] = useState('All')
   const [exportBackground, setExportBackground] = useState<ExportBackground>('transparent')
-  const [exportFormat, setExportFormat] = useState<ExportFormat>('svg')
   const [customBackground, setCustomBackground] = useState('#f5f5f7')
-  const [pngScale, setPngScale] = useState(2)
-  const [exportDpi, setExportDpi] = useState(192)
-  const [exportInline, setExportInline] = useState(true)
   const [snippetType, setSnippetType] = useState<ExportSnippet>('html')
   const [fileName, setFileName] = useState('latexgo-formula')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -490,6 +436,9 @@ function App() {
   const historyIndexRef = useRef(initialHistory.length - 1)
   const tabStopsRef = useRef<number[]>([])
   const tabStopIndexRef = useRef(0)
+  const pngScale = 2
+  const exportDpi = 192
+  const exportInline = true
 
   const renderOptions = useMemo<RenderOptions>(
     () => ({ allowHtml, display, font, mathmlSpacing }),
@@ -515,15 +464,6 @@ function App() {
     () => ['All', ...Array.from(new Set(texShelfFormulas.map((formula) => formula.category))).sort()],
     [],
   )
-  const texShelfLevels = useMemo(
-    () => [
-      'All',
-      ...Array.from(
-        new Set(texShelfFormulas.map((formula) => formula.level).filter((level): level is string => Boolean(level))),
-      ).sort(),
-    ],
-    [],
-  )
   const selectedTexShelfFormula = useMemo(
     () => texShelfFormulas.find((formula) => formula.id === currentFormulaId),
     [currentFormulaId],
@@ -536,9 +476,8 @@ function App() {
     return texShelfFormulas.filter((formula) => {
       const matchesCategory =
         texShelfCategory === 'All' || formula.category === texShelfCategory
-      const matchesLevel = texShelfLevel === 'All' || formula.level === texShelfLevel
 
-      if (!matchesCategory || !matchesLevel) return false
+      if (!matchesCategory) return false
       if (!query) return true
 
       const haystack = [
@@ -547,7 +486,6 @@ function App() {
         formula.subcategory,
         formula.description,
         formula.latex,
-        formula.level,
         ...formula.tags,
       ]
         .filter(Boolean)
@@ -556,7 +494,7 @@ function App() {
 
       return haystack.includes(query)
     })
-  }, [selectedTexShelfFormula, texShelfCategory, texShelfLevel, texShelfSearch])
+  }, [selectedTexShelfFormula, texShelfCategory, texShelfSearch])
   const favoriteItems = useMemo(
     () =>
       favorites.map((item, index) => ({
@@ -586,6 +524,29 @@ function App() {
       })
       .slice(0, 8)
   }, [autocompleteQuery])
+
+  useEffect(() => {
+    const editor = textareaRef.current
+
+    if (!editor || !autocompleteQuery || autocompleteSuggestions.length === 0) return
+
+    const lineStart = latex.lastIndexOf('\n', autocompleteQuery.start - 1) + 1
+    const lineText = latex.slice(lineStart, autocompleteQuery.start)
+    const lineIndex = latex.slice(0, autocompleteQuery.start).split('\n').length - 1
+    const computedStyle = window.getComputedStyle(editor)
+    const fontSize = Number.parseFloat(computedStyle.fontSize) || 14
+    const lineHeight = Number.parseFloat(computedStyle.lineHeight) || fontSize * 1.62
+    const paddingLeft = Number.parseFloat(computedStyle.paddingLeft) || 0
+    const paddingTop = Number.parseFloat(computedStyle.paddingTop) || 0
+    const charWidth = fontSize * 0.62
+    const left = paddingLeft + lineText.length * charWidth - editor.scrollLeft
+    const top = paddingTop + (lineIndex + 1) * lineHeight - editor.scrollTop + 4
+
+    setAutocompletePanelPosition({
+      left: Math.max(8, Math.min(left, editor.clientWidth - 240)),
+      top: Math.max(8, top),
+    })
+  }, [autocompleteQuery, autocompleteSuggestions.length, latex])
   const exportSnippet = useMemo(() => {
     const blockStart = exportInline ? '' : '<p>'
     const blockEnd = exportInline ? '' : '</p>'
@@ -1081,24 +1042,6 @@ function App() {
     }
   }
 
-  function downloadSelectedFormat() {
-    if (exportFormat === 'svg') {
-      downloadSvg()
-      return
-    }
-
-    downloadPng()
-  }
-
-  function applyExportPreset(preset: ExportPreset) {
-    setExportBackground(preset.background)
-    setExportFormat(preset.format)
-    setPngScale(preset.scale)
-    setExportDpi(preset.dpi)
-    setSnippetType(preset.snippet)
-    setExportInline(preset.inline)
-  }
-
   function removeLineBreaks() {
     updateLatex(latex.replace(/\n/g, ' '))
   }
@@ -1234,24 +1177,6 @@ function App() {
                     }}
                     placeholder="maxwell, bayes, system..."
                   />
-                </label>
-                <label htmlFor="texshelf-level">
-                  Level
-                  <select
-                    id="texshelf-level"
-                    value={texShelfLevel}
-                    onChange={(event) => {
-                      setTexShelfLevel(event.target.value)
-                      setCurrentFormulaId('')
-                      window.history.pushState({}, '', '/texshelf')
-                    }}
-                  >
-                    {texShelfLevels.map((level) => (
-                      <option key={level} value={level}>
-                        {level}
-                      </option>
-                    ))}
-                  </select>
                 </label>
               </div>
 
@@ -1483,7 +1408,14 @@ function App() {
             spellCheck={false}
           />
           {autocompleteSuggestions.length > 0 ? (
-            <div className="autocomplete-panel" role="listbox">
+            <div
+              className="autocomplete-panel"
+              role="listbox"
+              style={{
+                left: `${autocompletePanelPosition.left}px`,
+                top: `${autocompletePanelPosition.top}px`,
+              }}
+            >
               {autocompleteSuggestions.map((suggestion, index) => (
                 <button
                   className={index === activeSuggestionIndex ? 'active' : ''}
@@ -1512,6 +1444,18 @@ function App() {
               className="formula-preview"
               style={{ fontSize: `${previewSize}px` }}
             />
+            <label className="preview-size-slider" htmlFor="preview-size">
+              <span>Size</span>
+              <input
+                id="preview-size"
+                min="12"
+                max="64"
+                type="range"
+                value={previewSize}
+                onChange={(event) => setPreviewSize(Number(event.target.value))}
+                aria-valuetext={`${previewSize}px`}
+              />
+            </label>
           </div>
         </section>
 
@@ -1557,36 +1501,13 @@ function App() {
             </label>
           </fieldset>
 
-          <fieldset className="controls preview-controls">
-            <label htmlFor="preview-size">
-              Preview size
-              <input
-                id="preview-size"
-                min="12"
-                max="64"
-                type="number"
-                value={previewSize}
-                onChange={(event) => setPreviewSize(Number(event.target.value))}
-              />
-            </label>
-          </fieldset>
         </div>
 
         <section className="export-panel" aria-label="Export options">
-          <div className="preset-row" aria-label="Export presets">
-            {exportPresets.map((preset) => (
-              <button
-                className="secondary-button"
-                key={preset.label}
-                type="button"
-                onClick={() => applyExportPreset(preset)}
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="export-grid">
+          <div className="export-row">
+            <div className="export-section-title">
+              <h2>Download</h2>
+            </div>
             <label htmlFor="file-name">
               File name
               <input
@@ -1611,7 +1532,7 @@ function App() {
               </select>
             </label>
             {exportBackground === 'custom' ? (
-              <label htmlFor="custom-background">
+              <label className="export-color-control" htmlFor="custom-background">
                 Color
                 <input
                   id="custom-background"
@@ -1621,56 +1542,22 @@ function App() {
                 />
               </label>
             ) : null}
-            <label htmlFor="png-scale">
-              PNG scale
-              <input
-                id="png-scale"
-                min="1"
-                max="6"
-                step="1"
-                type="number"
-                value={pngScale}
-                onChange={(event) => setPngScale(Number(event.target.value))}
-              />
-            </label>
-            <label htmlFor="export-dpi">
-              DPI
-              <select
-                id="export-dpi"
-                value={exportDpi}
-                onChange={(event) => setExportDpi(Number(event.target.value))}
-              >
-                {[96, 144, 192, 300].map((dpi) => (
-                  <option key={dpi} value={dpi}>
-                    {dpi}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="inline-control">
-              <input
-                type="checkbox"
-                checked={exportInline}
-                onChange={(event) => setExportInline(event.target.checked)}
-              />
-              Inline snippet
-            </label>
-            <label htmlFor="export-format">
-              Download as
-              <select
-                id="export-format"
-                value={exportFormat}
-                onChange={(event) => setExportFormat(event.target.value as ExportFormat)}
-              >
-                <option value="svg">SVG</option>
-                <option value="png">PNG</option>
-              </select>
-            </label>
+            <div className="export-actions">
+              <button type="button" onClick={downloadSvg} disabled={!canExport}>
+                SVG
+              </button>
+              <button type="button" onClick={downloadPng} disabled={!canExport}>
+                PNG
+              </button>
+            </div>
           </div>
 
-          <div className="snippet-row">
+          <div className="export-row">
+            <div className="export-section-title">
+              <h2>Copy</h2>
+            </div>
             <label htmlFor="snippet-type">
-              Copy as
+              Format
               <select
                 id="snippet-type"
                 value={snippetType}
@@ -1689,16 +1576,7 @@ function App() {
               onClick={() => copyText(exportSnippet, 'snippet')}
               disabled={!canExport && snippetType !== 'latex' && snippetType !== 'mathjax'}
             >
-              {copied === 'snippet' ? 'Copied' : 'Copy Snippet'}
-            </button>
-            <button type="button" onClick={downloadSvg} disabled={!canExport}>
-              Download SVG
-            </button>
-            <button type="button" onClick={downloadPng} disabled={!canExport}>
-              Download PNG
-            </button>
-            <button type="button" className="secondary-button" onClick={downloadSelectedFormat} disabled={!canExport}>
-              Download Current
+              {copied === 'snippet' ? 'Copied' : 'Copy'}
             </button>
           </div>
 

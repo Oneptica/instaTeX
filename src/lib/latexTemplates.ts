@@ -26,7 +26,6 @@ export type TexShelfFormula = {
   latex: string
   description?: string
   tags: string[]
-  level?: string
   source?: string
 }
 

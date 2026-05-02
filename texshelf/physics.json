@@ -6,8 +6,11 @@
     "subcategory": "Mechanics",
     "latex": "\\mathbf{F}=m\\mathbf{a}",
     "description": "Force equals mass times acceleration.",
-    "tags": ["physics", "mechanics", "force"],
-    "level": "school"
+    "tags": [
+      "physics",
+      "mechanics",
+      "force"
+    ]
   },
   {
     "id": "euler-lagrange-equation",
@@ -16,8 +19,11 @@
     "subcategory": "Classical Mechanics",
     "latex": "\\pdv{L}{q}-\\dv{}{t}\\pdv{L}{\\dot{q}}=0",
     "description": "Euler-Lagrange equation for one generalized coordinate.",
-    "tags": ["physics", "mechanics", "lagrangian"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "mechanics",
+      "lagrangian"
+    ]
   },
   {
     "id": "hamiltonian-definition",
@@ -26,8 +32,11 @@
     "subcategory": "Classical Mechanics",
     "latex": "H(q,p,t)=\\sum_i p_i\\dot{q}_i-L(q,\\dot{q},t)",
     "description": "Hamiltonian as a Legendre transform of the Lagrangian.",
-    "tags": ["physics", "mechanics", "hamiltonian"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "mechanics",
+      "hamiltonian"
+    ]
   },
   {
     "id": "schrodinger-equation",
@@ -36,8 +45,11 @@
     "subcategory": "Quantum Mechanics",
     "latex": "i\\hbar\\pdv{\\Psi}{t}=\\hat{H}\\Psi",
     "description": "Time-dependent Schrodinger equation.",
-    "tags": ["physics", "quantum", "schrodinger"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "quantum",
+      "schrodinger"
+    ]
   },
   {
     "id": "planck-relation",
@@ -46,8 +58,11 @@
     "subcategory": "Quantum Mechanics",
     "latex": "E=h\\nu=\\hbar\\omega",
     "description": "Energy of a photon in terms of frequency.",
-    "tags": ["physics", "quantum", "energy"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "quantum",
+      "energy"
+    ]
   },
   {
     "id": "einstein-relation",
@@ -56,8 +71,11 @@
     "subcategory": "Relativity",
     "latex": "E=mc^2",
     "description": "Mass-energy equivalence.",
-    "tags": ["physics", "relativity", "energy"],
-    "level": "school"
+    "tags": [
+      "physics",
+      "relativity",
+      "energy"
+    ]
   },
   {
     "id": "ideal-gas-law",
@@ -66,8 +84,11 @@
     "subcategory": "Thermodynamics",
     "latex": "PV=nRT",
     "description": "Ideal gas equation of state.",
-    "tags": ["physics", "thermodynamics", "gas"],
-    "level": "school"
+    "tags": [
+      "physics",
+      "thermodynamics",
+      "gas"
+    ]
   },
   {
     "id": "boltzmann-entropy",
@@ -76,8 +97,11 @@
     "subcategory": "Statistical Mechanics",
     "latex": "S=k_B\\ln\\Omega",
     "description": "Boltzmann formula for entropy.",
-    "tags": ["physics", "entropy", "statistical-mechanics"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "entropy",
+      "statistical-mechanics"
+    ]
   },
   {
     "id": "gauss-law-integral",
@@ -86,8 +110,11 @@
     "subcategory": "Electromagnetism",
     "latex": "\\oint_{\\partial V}\\mathbf{E}\\cdot d\\mathbf{A}=\\frac{Q}{\\varepsilon_0}",
     "description": "Integral form of Gauss law for electricity.",
-    "tags": ["physics", "electromagnetism", "maxwell"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "electromagnetism",
+      "maxwell"
+    ]
   },
   {
     "id": "maxwell-equations",
@@ -96,8 +123,11 @@
     "subcategory": "Electromagnetism",
     "latex": "\\begin{aligned}\n\\nabla \\cdot \\mathbf{E} &= \\frac{\\rho}{\\varepsilon_0} \\\\\n\\nabla \\cdot \\mathbf{B} &= 0 \\\\\n\\nabla \\times \\mathbf{E} &= -\\pdv{\\mathbf{B}}{t} \\\\\n\\nabla \\times \\mathbf{B} &= \\mu_0\\mathbf{J}+\\mu_0\\varepsilon_0\\pdv{\\mathbf{E}}{t}\n\\end{aligned}",
     "description": "Differential form of Maxwell equations.",
-    "tags": ["physics", "electromagnetism", "maxwell"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "electromagnetism",
+      "maxwell"
+    ]
   },
   {
     "id": "lorentz-force",
@@ -106,8 +136,11 @@
     "subcategory": "Electromagnetism",
     "latex": "\\mathbf{F}=q\\left(\\mathbf{E}+\\mathbf{v}\\times\\mathbf{B}\\right)",
     "description": "Force on a charged particle in electric and magnetic fields.",
-    "tags": ["physics", "electromagnetism", "force"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "electromagnetism",
+      "force"
+    ]
   },
   {
     "id": "heisenberg-uncertainty",
@@ -116,8 +149,11 @@
     "subcategory": "Quantum Mechanics",
     "latex": "\\Delta x\\,\\Delta p\\geq \\frac{\\hbar}{2}",
     "description": "Position-momentum uncertainty relation.",
-    "tags": ["physics", "quantum", "uncertainty"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "quantum",
+      "uncertainty"
+    ]
   },
   {
     "id": "harmonic-oscillator-energy",
@@ -126,7 +162,10 @@
     "subcategory": "Quantum Mechanics",
     "latex": "E_n=\\hbar\\omega\\left(n+\\frac{1}{2}\\right)",
     "description": "Energy levels of the quantum harmonic oscillator.",
-    "tags": ["physics", "quantum", "oscillator"],
-    "level": "undergraduate"
+    "tags": [
+      "physics",
+      "quantum",
+      "oscillator"
+    ]
   }
 ]

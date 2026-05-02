@@ -1,12 +1,14 @@
 .app-shell {
   --radius: 4px;
   min-height: 100svh;
-  display: block;
+  display: flex;
+  justify-content: center;
   background: var(--canvas);
   color: var(--text);
 }
 
 .editor-pane {
+  width: min(1120px, 100%);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -718,8 +720,6 @@
 
 .autocomplete-panel {
   position: absolute;
-  left: 12px;
-  bottom: 12px;
   z-index: 2;
   width: min(360px, calc(100% - 24px));
   overflow: hidden;
@@ -898,39 +898,41 @@ select:focus {
 
 .export-panel {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fbfbfd;
 }
 
-.preset-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.export-grid,
-.snippet-row {
-  display: flex;
-  flex-wrap: wrap;
+.export-row {
+  display: grid;
+  grid-template-columns: 84px minmax(150px, 1fr) minmax(132px, 180px) auto;
   gap: 10px;
   align-items: end;
 }
 
-.export-grid label,
-.snippet-row label {
+.export-section-title {
+  min-height: 38px;
   display: flex;
-  min-width: 132px;
+  align-items: center;
+}
+
+.export-section-title h2 {
+  margin: 0;
+  color: var(--heading);
+  font: 600 14px/1.2 var(--sans);
+}
+
+.export-row label {
+  display: flex;
   flex-direction: column;
   gap: 7px;
   color: var(--muted);
   font: 500 12px/1.2 var(--sans);
 }
 
-.export-grid input[type='text'],
-.export-grid input[type='number'] {
+.export-row input[type='text'] {
   min-height: 38px;
   padding: 0 12px;
   border: 1px solid var(--border);
@@ -940,7 +942,11 @@ select:focus {
   font: 14px/1 var(--sans);
 }
 
-.export-grid input[type='color'] {
+.export-color-control {
+  max-width: 72px;
+}
+
+.export-row input[type='color'] {
   width: 58px;
   height: 38px;
   padding: 3px;
@@ -949,15 +955,10 @@ select:focus {
   background: var(--input);
 }
 
-.inline-control {
-  min-height: 38px;
-  justify-content: center;
-}
-
-.inline-control input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
+.export-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .export-output {
@@ -1052,18 +1053,48 @@ button:disabled {
 }
 
 .preview-surface {
+  position: relative;
   width: 100%;
   min-height: 190px;
-  height: auto;
+  height: 240px;
   display: grid;
   place-items: center;
   overflow: auto;
-  padding: 14px;
+  padding: 14px 52px 14px 14px;
   box-sizing: border-box;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--paper);
   box-shadow: none;
+}
+
+.preview-size-slider {
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  bottom: 14px;
+  width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font: 500 11px/1 var(--sans);
+}
+
+.preview-size-slider span {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.preview-size-slider input[type='range'] {
+  width: 128px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--button);
+  transform: rotate(-90deg);
+  transform-origin: center;
 }
 
 .formula-preview {
@@ -1116,12 +1147,24 @@ button:disabled {
     padding: 28px 18px;
   }
 
+  .editor-pane {
+    padding: 24px 18px 30px;
+  }
+
   .library-header h1 {
     font-size: 34px;
   }
 
   .editor-tools {
     grid-template-columns: 1fr;
+  }
+
+  .export-row {
+    grid-template-columns: 1fr;
+  }
+
+  .export-section-title {
+    min-height: 0;
   }
 
   .render-controls {
@@ -1134,6 +1177,7 @@ button:disabled {
 
   .preview-surface {
     min-height: 190px;
-    padding: 14px;
+    height: 220px;
+    padding: 14px 46px 14px 14px;
   }
 }

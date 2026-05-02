@@ -13,7 +13,6 @@ const categories = new Set([
   'Physics',
   'Chemistry',
 ])
-const levels = new Set(['school', 'undergraduate', 'graduate', 'reference'])
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 function checkString(entry, field, errors, location) {
@@ -60,10 +59,6 @@ function validateEntry(entry, errors, ids, location) {
     errors.push(`${location}: "description" must be a string when present.`)
   }
 
-  if ('level' in entry && (!levels.has(entry.level))) {
-    errors.push(`${location}: unsupported level "${entry.level}".`)
-  }
-
   if (!Array.isArray(entry.tags) || entry.tags.length === 0) {
     errors.push(`${location}: "tags" must be a non-empty string array.`)
   } else {
@@ -86,7 +81,6 @@ function validateEntry(entry, errors, ids, location) {
     'latex',
     'description',
     'tags',
-    'level',
     'source',
   ])
 

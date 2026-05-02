@@ -10,7 +10,7 @@ The best first contribution is usually a TeXShelf formula entry. TeXShelf lives 
 2. Add one formula entry following `texshelf/schema.json`.
 3. Keep `id` unique, stable, lowercase, and hyphenated.
 4. Use TeX source only.
-5. Add useful tags and a level when possible.
+5. Add useful tags.
 6. Run `npm run validate:texshelf`.
 
 Good entries are small, reusable formulas from common math, physics, chemistry, or related subjects.
@@ -33,7 +33,7 @@ npm run lint
 npm run build
 ```
 
-The validator checks JSON shape, required fields, duplicate IDs, supported categories, supported levels, and duplicate tags.
+The validator checks JSON shape, required fields, duplicate IDs, supported categories, and duplicate tags.
 
 ## License
 
