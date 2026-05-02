@@ -148,7 +148,33 @@ const inputOptionGroups = [
   { name: 'Background', templates: backgroundTemplates },
 ]
 
-function TemplateButtonLabel({ template }: { template: LatexTemplate }) {
+function slugifyAssetPart(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'item'
+  )
+}
+
+function getTemplateAssetPath(groupName: string, template: LatexTemplate, index: number) {
+  const groupSlug = slugifyAssetPart(groupName)
+  const itemSlug = slugifyAssetPart(template.description ?? template.label)
+
+  return `/symbols/${groupSlug}/${String(index + 1).padStart(2, '0')}-${itemSlug}.svg`
+}
+
+function TemplateButtonLabel({
+  template,
+  assetPath,
+}: {
+  template: LatexTemplate
+  assetPath?: string
+}) {
+  const [assetFailed, setAssetFailed] = useState(false)
+
   return (
     <>
       {template.swatch ? (
@@ -158,7 +184,18 @@ function TemplateButtonLabel({ template }: { template: LatexTemplate }) {
           aria-hidden="true"
         />
       ) : null}
-      <span>{template.label}</span>
+      {assetPath && !assetFailed ? (
+        <span className="template-symbol-frame" aria-hidden="true">
+          <img
+            className="template-symbol-image"
+            src={assetPath}
+            alt=""
+            onError={() => setAssetFailed(true)}
+          />
+        </span>
+      ) : (
+        <span>{template.label}</span>
+      )}
     </>
   )
 }
@@ -1379,7 +1416,7 @@ function App() {
             <section className="github-symbol-group" key={group.name} aria-label={group.name}>
               <p>{group.name}</p>
               <div className="github-symbol-preview">
-                {group.templates.slice(0, visibleToolbarTemplateCount).map((template) => (
+                {group.templates.slice(0, visibleToolbarTemplateCount).map((template, index) => (
                   <button
                     key={`${group.name}-preview-${template.label}-${template.prefix}`}
                     type="button"
@@ -1389,13 +1426,19 @@ function App() {
                     aria-label={template.description ?? template.label}
                     onClick={() => insertTemplate(template)}
                   >
-                    <TemplateButtonLabel template={template} />
+                    <TemplateButtonLabel
+                      template={template}
+                      assetPath={getTemplateAssetPath(group.name, template, index)}
+                    />
                   </button>
                 ))}
               </div>
               {group.templates.length > visibleToolbarTemplateCount ? (
                 <div className="github-symbol-popover">
-                  {group.templates.slice(visibleToolbarTemplateCount).map((template) => (
+                  {group.templates.slice(visibleToolbarTemplateCount).map((template, index) => {
+                    const templateIndex = index + visibleToolbarTemplateCount
+
+                    return (
                     <button
                       key={`${group.name}-${template.label}-${template.prefix}-${template.suffix ?? ''}`}
                       type="button"
@@ -1405,9 +1448,13 @@ function App() {
                       aria-label={template.description ?? template.label}
                       onClick={() => insertTemplate(template)}
                     >
-                      <TemplateButtonLabel template={template} />
+                      <TemplateButtonLabel
+                        template={template}
+                        assetPath={getTemplateAssetPath(group.name, template, templateIndex)}
+                      />
                     </button>
-                  ))}
+                    )
+                  })}
                 </div>
               ) : null}
             </section>

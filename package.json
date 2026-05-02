@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "generate:symbols": "node scripts/generate-symbol-assets.mjs",
     "validate:texshelf": "node scripts/validate-texshelf.mjs"
   },
   "dependencies": {

@@ -29,6 +29,8 @@
 !public/
 !public/favicon.svg
 !public/icons.svg
+!public/symbols/
+!public/symbols/**
 
 # TeXShelf formula library.
 !texshelf/
