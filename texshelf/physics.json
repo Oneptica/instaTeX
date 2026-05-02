@@ -98,5 +98,35 @@
     "description": "Differential form of Maxwell equations.",
     "tags": ["physics", "electromagnetism", "maxwell"],
     "level": "undergraduate"
+  },
+  {
+    "id": "lorentz-force",
+    "title": "Lorentz force",
+    "category": "Physics",
+    "subcategory": "Electromagnetism",
+    "latex": "\\mathbf{F}=q\\left(\\mathbf{E}+\\mathbf{v}\\times\\mathbf{B}\\right)",
+    "description": "Force on a charged particle in electric and magnetic fields.",
+    "tags": ["physics", "electromagnetism", "force"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "heisenberg-uncertainty",
+    "title": "Heisenberg uncertainty",
+    "category": "Physics",
+    "subcategory": "Quantum Mechanics",
+    "latex": "\\Delta x\\,\\Delta p\\geq \\frac{\\hbar}{2}",
+    "description": "Position-momentum uncertainty relation.",
+    "tags": ["physics", "quantum", "uncertainty"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "harmonic-oscillator-energy",
+    "title": "Quantum harmonic oscillator energy",
+    "category": "Physics",
+    "subcategory": "Quantum Mechanics",
+    "latex": "E_n=\\hbar\\omega\\left(n+\\frac{1}{2}\\right)",
+    "description": "Energy levels of the quantum harmonic oscillator.",
+    "tags": ["physics", "quantum", "oscillator"],
+    "level": "undergraduate"
   }
 ]

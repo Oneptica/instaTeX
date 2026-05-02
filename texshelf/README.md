@@ -44,6 +44,11 @@ Optional fields:
 - Keep entries small and reusable.
 - Use a unique `id`.
 - Put formulas in the most relevant JSON file.
+- Run `npm run validate:texshelf` before submitting.
+
+## License
+
+TeXShelf formula data is licensed under CC BY 4.0. See `LICENSE.md`.
 
 Suggested files:
 

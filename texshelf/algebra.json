@@ -78,5 +78,35 @@
     "description": "Equations grouped with a right-side brace note.",
     "tags": ["algebra", "brace", "annotation"],
     "level": "reference"
+  },
+  {
+    "id": "determinant-two-by-two",
+    "title": "2 by 2 determinant",
+    "category": "Linear Algebra",
+    "subcategory": "Determinants",
+    "latex": "\\begin{vmatrix}\na & b \\\\\nc & d\n\\end{vmatrix}=ad-bc",
+    "description": "Closed form for a 2 by 2 determinant.",
+    "tags": ["linear-algebra", "determinant", "matrix"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "euclidean-norm",
+    "title": "Euclidean norm",
+    "category": "Linear Algebra",
+    "subcategory": "Vector Norms",
+    "latex": "\\left\\|\\mathbf{x}\\right\\|_2=\\sqrt{x_1^2+x_2^2+\\cdots+x_n^2}",
+    "description": "Euclidean norm of an n-dimensional vector.",
+    "tags": ["linear-algebra", "vector", "norm"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "matrix-vector-product",
+    "title": "Matrix-vector product",
+    "category": "Linear Algebra",
+    "subcategory": "Matrices",
+    "latex": "\\mathbf{A}\\mathbf{x}=\\begin{bmatrix}\na_{11} & a_{12} \\\\\na_{21} & a_{22}\n\\end{bmatrix}\\begin{bmatrix}\nx_1 \\\\\nx_2\n\\end{bmatrix}",
+    "description": "A compact 2 by 2 matrix-vector product.",
+    "tags": ["linear-algebra", "matrix", "vector"],
+    "level": "undergraduate"
   }
 ]

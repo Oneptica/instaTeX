@@ -2,23 +2,41 @@
 
 Thanks for considering a contribution.
 
-At this stage, the easiest way to contribute is through **TeXShelf**, the open formula library in `texshelf/`.
+The best first contribution is usually a TeXShelf formula entry. TeXShelf lives in `texshelf/` and is the open formula library used by LaTeXgO.
 
-## Contributing Formulas
+## Formula Contributions
 
 1. Choose the closest JSON file in `texshelf/`.
 2. Add one formula entry following `texshelf/schema.json`.
-3. Keep the `id` unique and stable.
+3. Keep `id` unique, stable, lowercase, and hyphenated.
 4. Use TeX source only.
-5. Do not copy proprietary code, images, SVG output, or site-specific assets.
+5. Add useful tags and a level when possible.
+6. Run `npm run validate:texshelf`.
 
-Good contributions are small, reusable formulas that are common in math, physics, chemistry, or related fields.
+Good entries are small, reusable formulas from common math, physics, chemistry, or related subjects.
 
-## Formula Data License
+## Do Not Submit
 
-Until a formal license file is added, treat submitted formula data as intended for an open formula library. Contributors should only submit material they have the right to share.
+- proprietary code
+- images or SVG previews copied from other sites
+- scraped third-party formula libraries
+- site-specific templates or branding assets
+- formulas you are not allowed to share
 
-Recommended long-term split:
+## Validation
 
-- LaTeXgO application code: project owner decision
-- TeXShelf formula data: CC BY 4.0 or CC0
+Before opening a PR, run:
+
+```bash
+npm run validate:texshelf
+npm run lint
+npm run build
+```
+
+The validator checks JSON shape, required fields, duplicate IDs, supported categories, supported levels, and duplicate tags.
+
+## License
+
+TeXShelf formula data is licensed as CC BY 4.0. See `texshelf/LICENSE.md`.
+
+LaTeXgO application code licensing is controlled separately by the project owner.

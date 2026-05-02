@@ -38,5 +38,25 @@
     "description": "Precipitation reaction forming silver chloride.",
     "tags": ["chemistry", "ions", "precipitation", "mhchem"],
     "level": "school"
+  },
+  {
+    "id": "water-autoionization",
+    "title": "Water autoionization",
+    "category": "Chemistry",
+    "subcategory": "Equilibrium",
+    "latex": "\\ce{2H2O <=> H3O+ + OH-}",
+    "description": "Autoionization equilibrium of water.",
+    "tags": ["chemistry", "equilibrium", "water", "mhchem"],
+    "level": "school"
+  },
+  {
+    "id": "acid-base-neutralization",
+    "title": "Acid-base neutralization",
+    "category": "Chemistry",
+    "subcategory": "Ionic Reactions",
+    "latex": "\\ce{H+ + OH- -> H2O}",
+    "description": "Net ionic equation for strong acid-base neutralization.",
+    "tags": ["chemistry", "acid-base", "ions", "mhchem"],
+    "level": "school"
   }
 ]

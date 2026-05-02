@@ -21,6 +21,10 @@
 !src/
 !src/**
 
+# Local validation and maintenance scripts.
+!scripts/
+!scripts/**
+
 # Public assets used by index.html/Vite.
 !public/
 !public/favicon.svg

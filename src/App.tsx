@@ -20,20 +20,14 @@ import {
   type TexShelfFormula,
   backgroundTemplates,
   colorTemplates,
-  exampleTemplates,
-  functionTemplates,
   pairedCharacters,
-  scienceTemplates,
   sizeTemplates,
   texShelfFormulas,
   toolbarGroups,
 } from './lib/latexTemplates'
 import './App.css'
 
-const starterLatex = String.raw`%
-% Enter TeX commands below
-%
-x = {-b \pm \sqrt{b^2-4ac} \over 2a}.`
+const starterLatex = ''
 
 const historyStorageKey = 'latexgo.history'
 const favoritesStorageKey = 'latexgo.favorites'
@@ -55,10 +49,6 @@ type AutocompleteItem = {
   tabStops?: number[]
 }
 
-type SearchableTemplate = LatexTemplate & {
-  group: string
-}
-
 type ExportPreset = {
   label: string
   background: ExportBackground
@@ -70,7 +60,13 @@ type ExportPreset = {
 }
 
 function getInitialPage(): AppPage {
-  return window.location.pathname.endsWith('/texshelf') ? 'texshelf' : 'editor'
+  return window.location.pathname.startsWith('/texshelf') ? 'texshelf' : 'editor'
+}
+
+function getInitialFormulaId() {
+  const [, page, formulaId] = window.location.pathname.split('/')
+
+  return page === 'texshelf' ? formulaId ?? '' : ''
 }
 
 const autocompleteItems: AutocompleteItem[] = [
@@ -145,10 +141,6 @@ const exportPresets: ExportPreset[] = [
   },
 ]
 
-const templateGroups = [
-  { name: 'Functions', templates: functionTemplates },
-]
-
 const inputOptionGroups = [
   { name: 'Color', templates: colorTemplates },
   { name: 'TeX size', templates: sizeTemplates },
@@ -181,9 +173,11 @@ let texShelfPreviewQueue = Promise.resolve()
 
 function TexShelfFormulaCard({
   formula,
+  onOpen,
   onUse,
 }: {
   formula: TexShelfFormula
+  onOpen: (formula: TexShelfFormula) => void
   onUse: (formula: TexShelfFormula) => void
 }) {
   const previewRef = useRef<HTMLDivElement>(null)
@@ -228,7 +222,9 @@ function TexShelfFormulaCard({
     <article className="texshelf-card">
       <div className="texshelf-card-main">
         <div>
-          <h3>{formula.title}</h3>
+          <button className="texshelf-title-button" type="button" onClick={() => onOpen(formula)}>
+            {formula.title}
+          </button>
         </div>
       </div>
       {formula.description ? <p>{formula.description}</p> : null}
@@ -415,6 +411,7 @@ function getNavigationStops(input: string) {
 function App() {
   const initialHistory = useMemo(() => readStoredStringArray(historyStorageKey, [starterLatex]), [])
   const [currentPage, setCurrentPage] = useState<AppPage>(() => getInitialPage())
+  const [currentFormulaId, setCurrentFormulaId] = useState(() => getInitialFormulaId())
   const [latex, setLatex] = useState(initialHistory[initialHistory.length - 1] ?? starterLatex)
   const [display, setDisplay] = useState(true)
   const [allowHtml, setAllowHtml] = useState(false)
@@ -436,9 +433,9 @@ function App() {
   const [favorites, setFavorites] = useState(() => readStoredStringArray(favoritesStorageKey, []))
   const [cursorPosition, setCursorPosition] = useState(0)
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
-  const [templateSearch, setTemplateSearch] = useState('')
   const [texShelfSearch, setTexShelfSearch] = useState('')
   const [texShelfCategory, setTexShelfCategory] = useState('All')
+  const [texShelfLevel, setTexShelfLevel] = useState('All')
   const [exportBackground, setExportBackground] = useState<ExportBackground>('transparent')
   const [exportFormat, setExportFormat] = useState<ExportFormat>('svg')
   const [customBackground, setCustomBackground] = useState('#f5f5f7')
@@ -476,54 +473,34 @@ function App() {
       })),
     [historySnapshot],
   )
-  const allSearchableTemplates = useMemo<SearchableTemplate[]>(
-    () => [
-      ...toolbarGroups.flatMap((group) =>
-        group.templates.map((template) => ({ ...template, group: group.name })),
-      ),
-      ...functionTemplates.map((template) => ({ ...template, group: 'Functions' })),
-      ...colorTemplates.map((template) => ({ ...template, group: 'Color' })),
-      ...sizeTemplates.map((template) => ({ ...template, group: 'TeX size' })),
-      ...backgroundTemplates.map((template) => ({ ...template, group: 'Background' })),
-      ...exampleTemplates.map((template) => ({ ...template, group: 'TeXShelf' })),
-      ...scienceTemplates.map((template) => ({ ...template, group: 'Science' })),
-    ],
-    [],
-  )
-  const filteredTemplates = useMemo(() => {
-    const query = templateSearch.trim().toLowerCase()
-
-    if (!query) return []
-
-    return allSearchableTemplates
-      .filter((template) => {
-        const haystack = [
-          template.group,
-          template.label,
-          template.description,
-          template.prefix,
-          template.suffix,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-
-        return haystack.includes(query)
-      })
-      .slice(0, 24)
-  }, [allSearchableTemplates, templateSearch])
   const texShelfCategories = useMemo(
     () => ['All', ...Array.from(new Set(texShelfFormulas.map((formula) => formula.category))).sort()],
     [],
   )
+  const texShelfLevels = useMemo(
+    () => [
+      'All',
+      ...Array.from(
+        new Set(texShelfFormulas.map((formula) => formula.level).filter((level): level is string => Boolean(level))),
+      ).sort(),
+    ],
+    [],
+  )
+  const selectedTexShelfFormula = useMemo(
+    () => texShelfFormulas.find((formula) => formula.id === currentFormulaId),
+    [currentFormulaId],
+  )
   const filteredTexShelfFormulas = useMemo(() => {
+    if (selectedTexShelfFormula) return [selectedTexShelfFormula]
+
     const query = texShelfSearch.trim().toLowerCase()
 
     return texShelfFormulas.filter((formula) => {
       const matchesCategory =
         texShelfCategory === 'All' || formula.category === texShelfCategory
+      const matchesLevel = texShelfLevel === 'All' || formula.level === texShelfLevel
 
-      if (!matchesCategory) return false
+      if (!matchesCategory || !matchesLevel) return false
       if (!query) return true
 
       const haystack = [
@@ -541,7 +518,7 @@ function App() {
 
       return haystack.includes(query)
     })
-  }, [texShelfCategory, texShelfSearch])
+  }, [selectedTexShelfFormula, texShelfCategory, texShelfLevel, texShelfSearch])
   const favoriteItems = useMemo(
     () =>
       favorites.map((item, index) => ({
@@ -584,16 +561,18 @@ function App() {
     return `${blockStart}<img src="${svgDataUrl}" alt="LaTeX formula">${blockEnd}`
   }, [exportInline, exportSvgMarkup, latex, snippetType, svgDataUrl])
 
-  function navigateTo(page: AppPage) {
-    const path = page === 'texshelf' ? '/texshelf' : '/'
+  function navigateTo(page: AppPage, formulaId = '') {
+    const path = page === 'texshelf' ? `/texshelf${formulaId ? `/${formulaId}` : ''}` : '/'
 
     window.history.pushState({}, '', path)
     setCurrentPage(page)
+    setCurrentFormulaId(page === 'texshelf' ? formulaId : '')
   }
 
   useEffect(() => {
     function handlePopState() {
       setCurrentPage(getInitialPage())
+      setCurrentFormulaId(getInitialFormulaId())
     }
 
     window.addEventListener('popstate', handlePopState)
@@ -757,12 +736,8 @@ function App() {
     })
   }
 
-  function handleSearchTemplateClick(event: MouseEvent<HTMLButtonElement>) {
-    const template = filteredTemplates[Number(event.currentTarget.dataset.templateIndex)]
-
-    if (template) {
-      insertTemplate(template)
-    }
+  function openTexShelfFormula(formula: TexShelfFormula) {
+    navigateTo('texshelf', formula.id)
   }
 
   function closeMenuFromClick(event: MouseEvent<HTMLElement>) {
@@ -1149,59 +1124,123 @@ function App() {
               <h1 id="library-title">Formula library</h1>
               <p>Open reusable TeX formulas for math, physics, and chemistry.</p>
             </div>
-            <button type="button" className="secondary-button" onClick={() => navigateTo('editor')}>
-              LaTeXgO editor
-            </button>
+            <div className="library-actions">
+              <a
+                className="secondary-button link-button"
+                href="https://github.com/tzhaoo/LaTeXgO"
+                rel="noreferrer"
+                target="_blank"
+              >
+                Contribute on GitHub
+              </a>
+              <button type="button" className="secondary-button" onClick={() => navigateTo('editor')}>
+                LaTeXgO editor
+              </button>
+            </div>
           </header>
 
-          <section className="texshelf-panel texshelf-page-panel" aria-label="TeXShelf formulas">
-            <div className="texshelf-heading">
-              <div>
-                <p className="eyebrow">Browse</p>
-                <h2>{filteredTexShelfFormulas.length} formulas</h2>
-              </div>
-            </div>
-
-            <div className="texshelf-controls">
-              <label htmlFor="texshelf-search">
-                Search formulas
-                <input
-                  id="texshelf-search"
-                  type="search"
-                  value={texShelfSearch}
-                  onChange={(event) => setTexShelfSearch(event.target.value)}
-                  placeholder="maxwell, bayes, system..."
-                />
-              </label>
+          <div className="library-layout">
+            <aside className="library-sidebar" aria-label="TeXShelf filters">
+              <p>Domains</p>
               <div className="texshelf-categories" aria-label="TeXShelf categories">
                 {texShelfCategories.map((category) => (
                   <button
-                    className={category === texShelfCategory ? 'active' : ''}
+                    className={category === texShelfCategory && !selectedTexShelfFormula ? 'active' : ''}
                     key={category}
                     type="button"
-                    aria-pressed={category === texShelfCategory}
-                    onClick={() => setTexShelfCategory(category)}
+                    aria-pressed={category === texShelfCategory && !selectedTexShelfFormula}
+                    onClick={() => {
+                      setTexShelfCategory(category)
+                      setCurrentFormulaId('')
+                      window.history.pushState({}, '', '/texshelf')
+                    }}
                   >
                     {category}
                   </button>
                 ))}
               </div>
-            </div>
+            </aside>
 
-            <div className="texshelf-list" aria-live="polite">
-              {filteredTexShelfFormulas.length > 0 ? (
-                filteredTexShelfFormulas.map((formula) => (
-                  <TexShelfFormulaCard
-                    formula={formula}
-                    key={formula.id}
-                    onUse={insertTexShelfFormula}
+            <section className="texshelf-panel texshelf-page-panel" aria-label="TeXShelf formulas">
+              <div className="texshelf-heading">
+                <div>
+                  <p className="eyebrow">{selectedTexShelfFormula ? 'Formula' : 'Browse'}</p>
+                  <h2>
+                    {selectedTexShelfFormula
+                      ? selectedTexShelfFormula.title
+                      : `${filteredTexShelfFormulas.length} formulas`}
+                  </h2>
+                </div>
+                {selectedTexShelfFormula ? (
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => navigateTo('texshelf')}
+                  >
+                    All formulas
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="texshelf-controls">
+                <label htmlFor="texshelf-search">
+                  Search formulas
+                  <input
+                    id="texshelf-search"
+                    type="search"
+                    value={texShelfSearch}
+                    onChange={(event) => {
+                      setTexShelfSearch(event.target.value)
+                      setCurrentFormulaId('')
+                      window.history.pushState({}, '', '/texshelf')
+                    }}
+                    placeholder="maxwell, bayes, system..."
                   />
-                ))
-              ) : (
-                <p className="texshelf-empty">No matching formulas</p>
-              )}
-            </div>
-          </section>
+                </label>
+                <label htmlFor="texshelf-level">
+                  Level
+                  <select
+                    id="texshelf-level"
+                    value={texShelfLevel}
+                    onChange={(event) => {
+                      setTexShelfLevel(event.target.value)
+                      setCurrentFormulaId('')
+                      window.history.pushState({}, '', '/texshelf')
+                    }}
+                  >
+                    {texShelfLevels.map((level) => (
+                      <option key={level} value={level}>
+                        {level}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <p className="texshelf-count" aria-live="polite">
+                {selectedTexShelfFormula
+                  ? `/texshelf/${selectedTexShelfFormula.id}`
+                  : `${filteredTexShelfFormulas.length} result${
+                      filteredTexShelfFormulas.length === 1 ? '' : 's'
+                    }`}
+              </p>
+
+              <div className="texshelf-list" aria-live="polite">
+                {filteredTexShelfFormulas.length > 0 ? (
+                  filteredTexShelfFormulas.map((formula) => (
+                    <TexShelfFormulaCard
+                      formula={formula}
+                      key={formula.id}
+                      onOpen={openTexShelfFormula}
+                      onUse={insertTexShelfFormula}
+                    />
+                  ))
+                ) : (
+                  <p className="texshelf-empty">No matching formulas</p>
+                )}
+              </div>
+            </section>
+          </div>
         </section>
       </main>
     )
@@ -1223,92 +1262,6 @@ function App() {
         <label className="input-label" htmlFor="latex-input">
           TeX input
         </label>
-
-        <section className="template-search" aria-label="Template search">
-          <label htmlFor="template-search-input">
-            Search templates
-            <input
-              id="template-search-input"
-              type="search"
-              value={templateSearch}
-              onChange={(event) => setTemplateSearch(event.target.value)}
-              placeholder="fraction, matrix, chemistry..."
-            />
-          </label>
-          {templateSearch.trim() ? (
-            <div className="template-results">
-              {filteredTemplates.length > 0 ? (
-                filteredTemplates.map((template, index) => (
-                  <button
-                    className="template-result"
-                    key={`${template.group}-${template.label}-${template.prefix}-${template.suffix ?? ''}`}
-                    type="button"
-                    data-template-index={index}
-                    onClick={handleSearchTemplateClick}
-                  >
-                    <span className="template-result-label">
-                      <TemplateButtonLabel template={template} />
-                    </span>
-                    <small>{template.group}</small>
-                  </button>
-                ))
-              ) : (
-                <p>No matching templates</p>
-              )}
-            </div>
-          ) : null}
-        </section>
-
-        <div className="symbol-panel" aria-label="Symbol templates">
-          {templateGroups.map((group) => (
-            <section
-              className={`symbol-group template-group ${
-                group.name === 'TeXShelf' || group.name === 'Science' ? 'is-collapsible' : ''
-              }`}
-              key={group.name}
-              aria-label={group.name}
-            >
-              <p>{group.name}</p>
-              <div>
-                {group.templates.map((template) => (
-                  <button
-                    className="template-chip"
-                    key={`${group.name}-${template.label}-${template.prefix}-${template.suffix ?? ''}`}
-                    type="button"
-                    title={`${template.description ?? template.label}: ${template.prefix}${
-                      template.suffix ?? ''
-                    }`}
-                    aria-label={template.description ?? template.label}
-                    onClick={() => insertTemplate(template)}
-                  >
-                    <TemplateButtonLabel template={template} />
-                  </button>
-                ))}
-              </div>
-            </section>
-          ))}
-          {toolbarGroups.map((group) => (
-            <section className="symbol-group" key={group.name} aria-label={group.name}>
-              <p>{group.name}</p>
-              <div>
-                {group.templates.map((template) => (
-                  <button
-                    className="symbol-button"
-                    key={`${group.name}-${template.prefix}-${template.suffix ?? ''}`}
-                    type="button"
-                    title={`${template.description ?? template.label}: ${template.prefix}${
-                      template.suffix ?? ''
-                    }`}
-                    aria-label={template.description ?? template.label}
-                    onClick={() => insertTemplate(template)}
-                  >
-                    {template.label}
-                  </button>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
 
         <div className="github-input-header" aria-label="TeX editor toolbar">
           <div className="github-toolbar" aria-label="Editor commands">
@@ -1418,6 +1371,29 @@ function App() {
               </div>
             </details>
           </div>
+        </div>
+
+        <div className="symbol-strip" aria-label="Symbol templates">
+          {toolbarGroups.map((group) => (
+            <section className="github-symbol-group" key={group.name} aria-label={group.name}>
+              <p>{group.name}</p>
+              <div>
+                {group.templates.map((template) => (
+                  <button
+                    key={`${group.name}-${template.label}-${template.prefix}-${template.suffix ?? ''}`}
+                    type="button"
+                    title={`${template.description ?? template.label}: ${template.prefix}${
+                      template.suffix ?? ''
+                    }`}
+                    aria-label={template.description ?? template.label}
+                    onClick={() => insertTemplate(template)}
+                  >
+                    <TemplateButtonLabel template={template} />
+                  </button>
+                ))}
+              </div>
+            </section>
+          ))}
         </div>
 
         <div className="editor-frame">

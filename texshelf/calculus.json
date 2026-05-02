@@ -68,5 +68,35 @@
     "description": "Covariance of two random variables.",
     "tags": ["probability", "statistics", "covariance"],
     "level": "undergraduate"
+  },
+  {
+    "id": "fundamental-theorem-calculus",
+    "title": "Fundamental theorem of calculus",
+    "category": "Calculus",
+    "subcategory": "Integrals",
+    "latex": "\\int_a^b f'(x)\\,dx=f(b)-f(a)",
+    "description": "Integral of a derivative over an interval.",
+    "tags": ["calculus", "integral", "derivative"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "taylor-series",
+    "title": "Taylor series",
+    "category": "Calculus",
+    "subcategory": "Series",
+    "latex": "f(x)=\\sum_{n=0}^{\\infty}\\frac{f^{(n)}(a)}{n!}(x-a)^n",
+    "description": "Taylor expansion of a smooth function around a point.",
+    "tags": ["calculus", "series", "taylor"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "gradient-definition",
+    "title": "Gradient",
+    "category": "Calculus",
+    "subcategory": "Vector Calculus",
+    "latex": "\\nabla f=\\left(\\pdv{f}{x_1},\\pdv{f}{x_2},\\ldots,\\pdv{f}{x_n}\\right)",
+    "description": "Gradient of a scalar field.",
+    "tags": ["calculus", "vector-calculus", "gradient"],
+    "level": "undergraduate"
   }
 ]
