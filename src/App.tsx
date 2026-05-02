@@ -381,7 +381,6 @@ function App() {
   const [matrixType, setMatrixType] = useState('pmatrix')
   const [matrixRows, setMatrixRows] = useState(2)
   const [matrixColumns, setMatrixColumns] = useState(2)
-  const [matrixPicker, setMatrixPicker] = useState({ rows: 2, columns: 2 })
   const [svgMarkup, setSvgMarkup] = useState('')
   const [error, setError] = useState('')
   const [copied, setCopied] = useState('')
@@ -696,15 +695,6 @@ function App() {
 
   function insertMenuMatrix(event: MouseEvent<HTMLButtonElement>) {
     insertMatrix()
-    closeMenuFromClick(event)
-  }
-
-  function insertMenuMatrixWithSize(
-    rows: number,
-    columns: number,
-    event: MouseEvent<HTMLButtonElement>,
-  ) {
-    insertMatrixWithSize(rows, columns)
     closeMenuFromClick(event)
   }
 
@@ -1125,6 +1115,31 @@ function App() {
               Reset
             </button>
             <span className="github-divider" aria-hidden="true" />
+            <label className="toolbar-checkbox">
+              <input
+                type="checkbox"
+                checked={display}
+                onChange={(event) => updateDisplay(event.target.checked)}
+                disabled={isRendering}
+              />
+              Display
+            </label>
+            <label className="toolbar-select" htmlFor="font-select">
+              Font
+              <select
+                id="font-select"
+                value={font}
+                onChange={(event) => updateFont(event.target.value as MathJaxFont)}
+                disabled={isRendering}
+              >
+                {mathJaxFonts.map((mathJaxFont) => (
+                  <option key={mathJaxFont} value={mathJaxFont}>
+                    {mathJaxFont}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <span className="github-divider" aria-hidden="true" />
             {inputOptionGroups.map((group) => (
               <details className="github-menu" key={group.name}>
                 <summary>{group.name}</summary>
@@ -1188,29 +1203,6 @@ function App() {
                 <button type="button" onClick={insertMenuMatrix}>
                   Insert Matrix
                 </button>
-                <div className="matrix-picker" aria-label="Matrix size picker">
-                  {Array.from({ length: 25 }, (_, index) => {
-                    const row = Math.floor(index / 5) + 1
-                    const column = (index % 5) + 1
-                    const active = row <= matrixPicker.rows && column <= matrixPicker.columns
-
-                    return (
-                      <button
-                        className={active ? 'active' : ''}
-                        key={`${row}-${column}`}
-                        type="button"
-                        title={`${row} x ${column}`}
-                        aria-label={`Insert ${row} by ${column} matrix`}
-                        onMouseEnter={() => setMatrixPicker({ rows: row, columns: column })}
-                        onFocus={() => setMatrixPicker({ rows: row, columns: column })}
-                        onClick={(event) => insertMenuMatrixWithSize(row, column, event)}
-                      />
-                    )
-                  })}
-                  <span>
-                    {matrixPicker.rows} x {matrixPicker.columns}
-                  </span>
-                </div>
               </div>
             </details>
           </div>
@@ -1290,34 +1282,6 @@ function App() {
             </label>
           </div>
         </section>
-
-        <div className="editor-tools">
-          <fieldset className="controls render-controls" disabled={isRendering}>
-            <label>
-              <input
-                type="checkbox"
-                checked={display}
-                onChange={(event) => updateDisplay(event.target.checked)}
-              />
-              Display style
-            </label>
-            <label className="font-control" htmlFor="font-select">
-              Font
-              <select
-                id="font-select"
-                value={font}
-                onChange={(event) => updateFont(event.target.value as MathJaxFont)}
-              >
-                {mathJaxFonts.map((mathJaxFont) => (
-                  <option key={mathJaxFont} value={mathJaxFont}>
-                    {mathJaxFont}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </fieldset>
-
-        </div>
 
         <section className="export-panel" aria-label="Export options">
           <div className="export-row">

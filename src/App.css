@@ -422,6 +422,55 @@
   background: var(--border);
 }
 
+.toolbar-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  color: #57606a;
+  font: 500 12px/1 var(--sans);
+  cursor: pointer;
+}
+
+.toolbar-checkbox input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.toolbar-checkbox:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolbar-select {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  color: #57606a;
+  font: 500 12px/1 var(--sans);
+}
+
+.toolbar-select select {
+  min-height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: #24292f;
+  background: #ffffff;
+  font: 500 12px/1 var(--sans);
+  cursor: pointer;
+}
+
+.toolbar-select select:hover:not(:disabled) {
+  background: #f6f8fa;
+}
+
+.toolbar-select select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .github-menu {
   position: relative;
 }
@@ -816,41 +865,6 @@ select:focus {
 
 .preview-controls {
   align-content: start;
-}
-
-.matrix-picker {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(5, 18px) auto;
-  gap: 6px;
-  align-items: center;
-  padding-top: 2px;
-}
-
-.matrix-picker button {
-  width: 18px;
-  min-width: 18px;
-  min-height: 18px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: #ffffff;
-}
-
-.matrix-picker button:nth-of-type(5n + 1) {
-  grid-column: 1;
-}
-
-.matrix-picker button.active {
-  border-color: var(--button);
-  background: rgba(0, 113, 227, 0.16);
-}
-
-.matrix-picker span {
-  grid-column: 6;
-  grid-row: 1 / span 5;
-  color: var(--muted);
-  font: 13px/1.2 var(--sans);
 }
 
 .export-panel {
