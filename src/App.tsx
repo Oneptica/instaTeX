@@ -29,7 +29,6 @@ const historyStorageKey = 'latexgo.history'
 const favoritesStorageKey = 'latexgo.favorites'
 
 type ExportBackground = 'transparent' | 'white' | 'black' | 'custom'
-type ExportSnippet = 'latex' | 'svg' | 'data-url' | 'html' | 'markdown' | 'mathjax'
 type AppPage = 'editor' | 'texshelf'
 
 type AutocompleteItem = {
@@ -330,10 +329,6 @@ function buildExportSvg(markup: string, background: ExportBackground, customColo
   return new XMLSerializer().serializeToString(svg)
 }
 
-function makeDataUrl(svg: string) {
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-}
-
 function tableTextToLatex(text: string, matrixType: string) {
   const rows = text
     .trim()
@@ -394,7 +389,6 @@ function App() {
   const [texShelfCategory, setTexShelfCategory] = useState('All')
   const [exportBackground, setExportBackground] = useState<ExportBackground>('transparent')
   const [customBackground, setCustomBackground] = useState('#f5f5f7')
-  const [snippetType, setSnippetType] = useState<ExportSnippet>('html')
   const [fileName, setFileName] = useState('latexgo-formula')
   const editorFrameRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<EditorView | null>(null)
@@ -405,7 +399,6 @@ function App() {
   const historyIndexRef = useRef(initialHistory.length - 1)
   const pngScale = 2
   const exportDpi = 192
-  const exportInline = true
 
   useEffect(() => {
     matrixTypeRef.current = matrixType
@@ -420,9 +413,6 @@ function App() {
     () => buildExportSvg(svgMarkup, exportBackground, customBackground),
     [customBackground, exportBackground, svgMarkup],
   )
-  const svgDataUrl = useMemo(() => (exportSvgMarkup ? makeDataUrl(exportSvgMarkup) : ''), [
-    exportSvgMarkup,
-  ])
   const historyItems = useMemo(
     () =>
       historySnapshot.map((item, index) => ({
@@ -475,18 +465,6 @@ function App() {
     [favorites],
   )
   const isFavorite = favorites.includes(latex)
-  const exportSnippet = useMemo(() => {
-    const blockStart = exportInline ? '' : '<p>'
-    const blockEnd = exportInline ? '' : '</p>'
-
-    if (snippetType === 'latex') return latex
-    if (snippetType === 'svg') return exportSvgMarkup
-    if (snippetType === 'data-url') return svgDataUrl
-    if (snippetType === 'markdown') return `![formula](${svgDataUrl})`
-    if (snippetType === 'mathjax') return exportInline ? `\\(${latex}\\)` : `\\[\n${latex}\n\\]`
-
-    return `${blockStart}<img src="${svgDataUrl}" alt="LaTeX formula">${blockEnd}`
-  }, [exportInline, exportSvgMarkup, latex, snippetType, svgDataUrl])
 
   function navigateTo(page: AppPage, formulaId = '') {
     const path = page === 'texshelf' ? `/texshelf${formulaId ? `/${formulaId}` : ''}` : '/'
@@ -853,11 +831,64 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, latex, renderOptions])
 
-  async function copyText(text: string, label: string) {
-    if (!text) return
+  async function copyLatex() {
+    if (!latex) return
 
-    await navigator.clipboard.writeText(text)
-    setCopied(label)
+    await navigator.clipboard.writeText(latex)
+    setCopied('latex')
+  }
+
+  async function copyImage() {
+    if (!canExport || !outputRef.current) return
+
+    const svgElement = outputRef.current.querySelector('svg')
+    if (!svgElement) return
+
+    try {
+      const bounds = svgElement.getBoundingClientRect()
+      const serializedSvg = buildExportSvg(svgElement.outerHTML, exportBackground, customBackground)
+      const blob = new Blob([serializedSvg], { type: 'image/svg+xml;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+
+      const image = new Image()
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve()
+        image.onerror = () => reject(new Error('Failed to load image'))
+        image.src = url
+      })
+
+      const scale = 2
+      const width = Math.max(1, Math.ceil(bounds.width || image.naturalWidth))
+      const height = Math.max(1, Math.ceil(bounds.height || image.naturalHeight))
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+
+      if (!context) {
+        URL.revokeObjectURL(url)
+        throw new Error('Canvas is not available.')
+      }
+
+      canvas.width = Math.ceil(width * scale)
+      canvas.height = Math.ceil(height * scale)
+      context.scale(scale, scale)
+      context.clearRect(0, 0, width, height)
+      context.drawImage(image, 0, 0, width, height)
+
+      URL.revokeObjectURL(url)
+
+      canvas.toBlob(async (pngBlob) => {
+        if (!pngBlob) return
+
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'image/png': pngBlob,
+          }),
+        ])
+        setCopied('image')
+      }, 'image/png')
+    } catch (error) {
+      console.error('Failed to copy image:', error)
+    }
   }
 
   function getDownloadName(extension: string) {
@@ -1336,36 +1367,15 @@ function App() {
             <div className="export-section-title">
               <h2>Copy</h2>
             </div>
-            <label htmlFor="snippet-type">
-              Format
-              <select
-                id="snippet-type"
-                value={snippetType}
-                onChange={(event) => setSnippetType(event.target.value as ExportSnippet)}
-              >
-                <option value="html">HTML image</option>
-                <option value="markdown">Markdown image</option>
-                <option value="mathjax">MathJax delimiters</option>
-                <option value="latex">Raw TeX</option>
-                <option value="svg">SVG markup</option>
-                <option value="data-url">SVG data URL</option>
-              </select>
-            </label>
-            <button
-              type="button"
-              onClick={() => copyText(exportSnippet, 'snippet')}
-              disabled={!canExport && snippetType !== 'latex' && snippetType !== 'mathjax'}
-            >
-              {copied === 'snippet' ? 'Copied' : 'Copy'}
-            </button>
+            <div className="export-actions">
+              <button type="button" onClick={copyLatex}>
+                {copied === 'latex' ? 'Copied' : 'Copy LaTeX'}
+              </button>
+              <button type="button" onClick={copyImage} disabled={!canExport}>
+                {copied === 'image' ? 'Copied' : 'Copy Image'}
+              </button>
+            </div>
           </div>
-
-          <textarea
-            className="export-output"
-            value={exportSnippet}
-            readOnly
-            onClick={(event) => event.currentTarget.select()}
-          />
         </section>
 
         <div className="actions" aria-label="Formula actions">
@@ -1417,9 +1427,6 @@ function App() {
           </button>
           <button type="button" className="secondary-button" onClick={clearHistory}>
             Clear History
-          </button>
-          <button type="button" onClick={() => copyText(exportSvgMarkup, 'svg')} disabled={!canExport}>
-            {copied === 'svg' ? 'Copied' : 'Copy SVG'}
           </button>
         </div>
 
