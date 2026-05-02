@@ -1,0 +1,65 @@
+# Whitelist mode: ignore everything by default.
+*
+
+# Project metadata and docs.
+!.gitignore
+!README.md
+!CONTRIBUTING.md
+!LICENSE*
+
+# App entry and toolchain config.
+!index.html
+!package.json
+!package-lock.json
+!eslint.config.js
+!vite.config.ts
+!tsconfig.json
+!tsconfig.app.json
+!tsconfig.node.json
+
+# Source code.
+!src/
+!src/**
+
+# Public assets used by index.html/Vite.
+!public/
+!public/favicon.svg
+!public/icons.svg
+
+# TeXShelf formula library.
+!texshelf/
+!texshelf/**
+
+# Optional repository automation.
+!.github/
+!.github/**
+
+# Shareable environment template only.
+!.env.example
+
+# Generated output, local dependencies, logs, caches, and reference captures stay ignored.
+node_modules/
+dist/
+dist-ssr/
+ref/
+logs/
+*.log
+*.local
+.env
+.env.*
+!.env.example
+.vite/
+.turbo/
+.cache/
+coverage/
+
+# Editor and OS noise.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

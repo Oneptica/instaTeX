@@ -1,0 +1,72 @@
+[
+  {
+    "id": "substack-sum",
+    "title": "Substack sum",
+    "category": "Calculus",
+    "subcategory": "Series",
+    "latex": "\\sum_{\\substack{\n0 < i < m \\\\\n0 < j < n\n}} P(i,j)",
+    "description": "Summation with stacked constraints.",
+    "tags": ["calculus", "sum", "series"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "fourier-transform",
+    "title": "Fourier transform",
+    "category": "Calculus",
+    "subcategory": "Transforms",
+    "latex": "\\hat{f}(\\xi)=\\int_{-\\infty}^{\\infty} f(x)e^{-2\\pi i x \\xi}\\,dx",
+    "description": "A common Fourier transform convention.",
+    "tags": ["calculus", "integral", "fourier"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "ordinary-and-partial-derivatives",
+    "title": "Ordinary and partial derivatives",
+    "category": "Calculus",
+    "subcategory": "Derivatives",
+    "latex": "\\dv{x}{t} = v,\\qquad \\pdv{u}{t} = \\alpha \\pdv[2]{u}{x}",
+    "description": "Physics-style derivative notation.",
+    "tags": ["calculus", "derivative", "partial"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "wave-equation",
+    "title": "Wave equation",
+    "category": "Calculus",
+    "subcategory": "Partial Differential Equations",
+    "latex": "\\pdv[2]{u}{t}=c^2\\pdv[2]{u}{x}",
+    "description": "One-dimensional wave equation.",
+    "tags": ["calculus", "pde", "wave"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "normal-distribution",
+    "title": "Normal distribution",
+    "category": "Probability",
+    "subcategory": "Distributions",
+    "latex": "f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}",
+    "description": "Probability density of a normal distribution.",
+    "tags": ["probability", "statistics", "distribution"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "bayes-theorem",
+    "title": "Bayes theorem",
+    "category": "Probability",
+    "subcategory": "Conditional Probability",
+    "latex": "P(A\\mid B)=\\frac{P(B\\mid A)P(A)}{P(B)}",
+    "description": "Bayes theorem for conditional probability.",
+    "tags": ["probability", "bayes", "conditional"],
+    "level": "undergraduate"
+  },
+  {
+    "id": "covariance",
+    "title": "Covariance",
+    "category": "Probability",
+    "subcategory": "Statistics",
+    "latex": "\\operatorname{Cov}(X,Y)=E\\left[(X-E[X])(Y-E[Y])\\right]",
+    "description": "Covariance of two random variables.",
+    "tags": ["probability", "statistics", "covariance"],
+    "level": "undergraduate"
+  }
+]

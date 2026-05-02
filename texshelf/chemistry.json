@@ -1,0 +1,42 @@
+[
+  {
+    "id": "carbon-dioxide-reduction",
+    "title": "Carbon dioxide reduction",
+    "category": "Chemistry",
+    "subcategory": "Reactions",
+    "latex": "\\ce{CO2 + C -> 2 CO}",
+    "description": "Carbon dioxide reacts with carbon to form carbon monoxide.",
+    "tags": ["chemistry", "reaction", "mhchem"],
+    "level": "school"
+  },
+  {
+    "id": "haber-process",
+    "title": "Haber process",
+    "category": "Chemistry",
+    "subcategory": "Equilibrium",
+    "latex": "\\ce{N2 + 3H2 <=> 2NH3}",
+    "description": "Nitrogen and hydrogen in equilibrium with ammonia.",
+    "tags": ["chemistry", "equilibrium", "mhchem"],
+    "level": "school"
+  },
+  {
+    "id": "methane-combustion",
+    "title": "Methane combustion",
+    "category": "Chemistry",
+    "subcategory": "Reactions",
+    "latex": "\\ce{CH4 + 2O2 -> CO2 + 2H2O}",
+    "description": "Complete combustion of methane.",
+    "tags": ["chemistry", "combustion", "mhchem"],
+    "level": "school"
+  },
+  {
+    "id": "silver-chloride-precipitation",
+    "title": "Silver chloride precipitation",
+    "category": "Chemistry",
+    "subcategory": "Ionic Reactions",
+    "latex": "\\ce{Ag+ + Cl- -> AgCl v}",
+    "description": "Precipitation reaction forming silver chloride.",
+    "tags": ["chemistry", "ions", "precipitation", "mhchem"],
+    "level": "school"
+  }
+]

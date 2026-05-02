@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://latexgo.app/texshelf.schema.json",
+  "title": "TeXShelf Formula Entry",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "title", "category", "latex", "tags"],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      },
+      "title": {
+        "type": "string",
+        "minLength": 1
+      },
+      "category": {
+        "type": "string",
+        "enum": ["Algebra", "Calculus", "Linear Algebra", "Probability", "Physics", "Chemistry"]
+      },
+      "subcategory": {
+        "type": "string"
+      },
+      "latex": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": {
+        "type": "string"
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "uniqueItems": true
+      },
+      "level": {
+        "type": "string",
+        "enum": ["school", "undergraduate", "graduate", "reference"]
+      },
+      "source": {
+        "type": "string"
+      }
+    }
+  }
+}
