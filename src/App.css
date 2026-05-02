@@ -491,7 +491,7 @@
 
 .github-symbol-group {
   position: relative;
-  width: 118px;
+  width: 136px;
   min-height: 58px;
   display: grid;
   gap: 5px;
@@ -511,15 +511,49 @@
   white-space: nowrap;
 }
 
-.github-symbol-group div {
-  display: flex;
+.github-symbol-preview,
+.github-symbol-popover {
   flex-wrap: wrap;
   gap: 4px;
   min-width: 0;
 }
 
-.github-symbol-group button:nth-of-type(n + 5) {
+.github-symbol-preview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.github-symbol-popover {
   display: none;
+  flex-wrap: wrap;
+}
+
+.github-symbol-preview button,
+.github-symbol-popover button {
+  min-width: 26px;
+  min-height: 26px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 7px;
+  color: var(--heading);
+  font: 500 13px/1 var(--sans);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.github-symbol-popover {
+  position: absolute;
+  top: 100%;
+  left: -1px;
+  right: -1px;
+  z-index: 5;
+  padding: 0 6px 6px;
+  border: 1px solid var(--border);
+  border-top: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: #ffffff;
 }
 
 .github-symbol-group button {
@@ -542,27 +576,14 @@
 .github-symbol-group:hover,
 .github-symbol-group:focus-within {
   border-color: var(--border);
+  border-bottom-color: transparent;
+  border-radius: var(--radius) var(--radius) 0 0;
   background: #ffffff;
 }
 
-.github-symbol-group:hover div,
-.github-symbol-group:focus-within div {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 5;
-  width: max-content;
-  max-width: min(460px, calc(100vw - 36px));
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
-}
-
-.github-symbol-group:hover button,
-.github-symbol-group:focus-within button {
-  display: inline-flex;
+.github-symbol-group:hover .github-symbol-popover,
+.github-symbol-group:focus-within .github-symbol-popover {
+  display: flex;
 }
 
 .github-matrix-menu .github-menu-panel {
@@ -1093,12 +1114,7 @@ button:disabled {
   }
 
   .github-symbol-group {
-    width: 104px;
-  }
-
-  .github-symbol-group:hover div,
-  .github-symbol-group:focus-within div {
-    max-width: calc(100vw - 36px);
+    width: 136px;
   }
 
   .preview-surface {

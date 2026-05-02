@@ -28,6 +28,7 @@ import {
 import './App.css'
 
 const starterLatex = ''
+const visibleToolbarTemplateCount = 4
 
 const historyStorageKey = 'latexgo.history'
 const favoritesStorageKey = 'latexgo.favorites'
@@ -1377,10 +1378,10 @@ function App() {
           {toolbarGroups.map((group) => (
             <section className="github-symbol-group" key={group.name} aria-label={group.name}>
               <p>{group.name}</p>
-              <div>
-                {group.templates.map((template) => (
+              <div className="github-symbol-preview">
+                {group.templates.slice(0, visibleToolbarTemplateCount).map((template) => (
                   <button
-                    key={`${group.name}-${template.label}-${template.prefix}-${template.suffix ?? ''}`}
+                    key={`${group.name}-preview-${template.label}-${template.prefix}`}
                     type="button"
                     title={`${template.description ?? template.label}: ${template.prefix}${
                       template.suffix ?? ''
@@ -1392,6 +1393,23 @@ function App() {
                   </button>
                 ))}
               </div>
+              {group.templates.length > visibleToolbarTemplateCount ? (
+                <div className="github-symbol-popover">
+                  {group.templates.slice(visibleToolbarTemplateCount).map((template) => (
+                    <button
+                      key={`${group.name}-${template.label}-${template.prefix}-${template.suffix ?? ''}`}
+                      type="button"
+                      title={`${template.description ?? template.label}: ${template.prefix}${
+                        template.suffix ?? ''
+                      }`}
+                      aria-label={template.description ?? template.label}
+                      onClick={() => insertTemplate(template)}
+                    >
+                      <TemplateButtonLabel template={template} />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </section>
           ))}
         </div>
