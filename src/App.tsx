@@ -14,11 +14,11 @@ import {
 } from './lib/mathjax'
 import {
   type LatexTemplate,
-  type TexShelfFormula,
+  type LaTeXgOFormula,
   backgroundTemplates,
   colorTemplates,
   sizeTemplates,
-  texShelfFormulas,
+  latexgoFormulas,
   toolbarGroups,
 } from './lib/latexTemplates'
 import './App.css'
@@ -26,8 +26,8 @@ import './App.css'
 const starterLatex = ''
 const visibleToolbarTemplateCount = 4
 
-const historyStorageKey = 'latexgo.history'
-const exportFileBaseName = 'latexgo-formula'
+const historyStorageKey = 'instatex.history'
+const exportFileBaseName = 'instatex-formula'
 
 type ExportBackground = 'transparent' | 'white' | 'black' | 'custom'
 
@@ -38,7 +38,7 @@ type AutocompleteItem = {
   tabStops?: number[]
 }
 
-type TexShelfSearchItem = TexShelfFormula & {
+type LaTeXgOSearchItem = LaTeXgOFormula & {
   tagsText: string
 }
 
@@ -169,21 +169,21 @@ function TemplateButtonLabel({
   )
 }
 
-const texShelfPreviewOptions: RenderOptions = {
+const latexgoPreviewOptions: RenderOptions = {
   allowHtml: false,
   display: true,
   font: 'mathjax-newcm',
   mathmlSpacing: false,
 }
 
-let texShelfPreviewQueue = Promise.resolve()
+let latexgoPreviewQueue = Promise.resolve()
 
-function TexShelfFormulaCard({
+function LaTeXgOFormulaCard({
   formula,
   onUse,
 }: {
-  formula: TexShelfFormula
-  onUse: (formula: TexShelfFormula) => void
+  formula: LaTeXgOFormula
+  onUse: (formula: LaTeXgOFormula) => void
 }) {
   const previewRef = useRef<HTMLDivElement>(null)
   const [previewError, setPreviewError] = useState('')
@@ -192,12 +192,12 @@ function TexShelfFormulaCard({
   useEffect(() => {
     let cancelled = false
 
-    const renderPreview = texShelfPreviewQueue.then(async () => {
+    const renderPreview = latexgoPreviewQueue.then(async () => {
       if (!previewRef.current) return
 
       try {
         setPreviewError('')
-        await renderLatexToSvg(formula.latex, previewRef.current, texShelfPreviewOptions)
+        await renderLatexToSvg(formula.latex, previewRef.current, latexgoPreviewOptions)
       } catch (error) {
         if (cancelled) return
 
@@ -206,7 +206,7 @@ function TexShelfFormulaCard({
       }
     })
 
-    texShelfPreviewQueue = renderPreview.catch(() => undefined)
+    latexgoPreviewQueue = renderPreview.catch(() => undefined)
 
     return () => {
       cancelled = true
@@ -224,22 +224,22 @@ function TexShelfFormulaCard({
   }
 
   return (
-    <article className="texshelf-card">
-      <div className="texshelf-card-main">
+    <article className="latexgo-card">
+      <div className="latexgo-card-main">
         <h3>{formula.title}</h3>
       </div>
       {formula.description ? <p>{formula.description}</p> : null}
-      <div className="texshelf-preview" ref={previewRef} aria-label={`${formula.title} preview`}>
+      <div className="latexgo-preview" ref={previewRef} aria-label={`${formula.title} preview`}>
         {previewError ? <span>{previewError}</span> : null}
       </div>
-      <div className="texshelf-code-row">
+      <div className="latexgo-code-row">
         <code>{formula.latex}</code>
-        <div className="texshelf-card-actions">
+        <div className="latexgo-card-actions">
           <button type="button" className="secondary-button" onClick={copyFormulaCode}>
             {copied ? 'Copied' : 'Copy code'}
           </button>
           <button type="button" onClick={() => onUse(formula)}>
-            Use in LaTeXgO
+            Use in InstaTex
           </button>
         </div>
       </div>
@@ -297,7 +297,7 @@ function buildExportSvg(markup: string, background: ExportBackground, customColo
   svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
   svg.setAttribute('color', getExportInkColor(background))
 
-  const existingBackground = svg.querySelector('[data-latexgo-background="true"]')
+  const existingBackground = svg.querySelector('[data-instatex-background="true"]')
   existingBackground?.remove()
 
   const backgroundColor = getExportBackgroundColor(background, customColor)
@@ -305,7 +305,7 @@ function buildExportSvg(markup: string, background: ExportBackground, customColo
   if (backgroundColor) {
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
 
-    rect.setAttribute('data-latexgo-background', 'true')
+    rect.setAttribute('data-instatex-background', 'true')
     rect.setAttribute('x', '0')
     rect.setAttribute('y', '0')
     rect.setAttribute('width', '100%')
@@ -371,8 +371,8 @@ function App() {
   const [canRedo, setCanRedo] = useState(false)
   const [historySnapshot, setHistorySnapshot] = useState(initialHistory)
   const [historyIndex, setHistoryIndex] = useState(initialHistory.length - 1)
-  const [texShelfSearch, setTexShelfSearch] = useState('')
-  const [texShelfCategory, setTexShelfCategory] = useState('All')
+  const [latexgoSearch, setLaTeXgOSearch] = useState('')
+  const [latexgoCategory, setLaTeXgOCategory] = useState('All')
   const [exportBackground, setExportBackground] = useState<ExportBackground>('transparent')
   const [customBackground, setCustomBackground] = useState('#f5f5f7')
   const editorFrameRef = useRef<HTMLDivElement>(null)
@@ -384,17 +384,17 @@ function App() {
   const historyIndexRef = useRef(initialHistory.length - 1)
   const pngScale = 2
   const exportDpi = 192
-  const texShelfSearchItems = useMemo<TexShelfSearchItem[]>(
+  const latexgoSearchItems = useMemo<LaTeXgOSearchItem[]>(
     () =>
-      texShelfFormulas.map((formula) => ({
+      latexgoFormulas.map((formula) => ({
         ...formula,
         tagsText: formula.tags.join(' '),
       })),
     [],
   )
-  const texShelfFuse = useMemo(
+  const latexgoFuse = useMemo(
     () =>
-      new Fuse(texShelfSearchItems, {
+      new Fuse(latexgoSearchItems, {
         includeScore: true,
         ignoreLocation: true,
         threshold: 0.32,
@@ -408,7 +408,7 @@ function App() {
           { name: 'latex', weight: 1 },
         ],
       }),
-    [texShelfSearchItems],
+    [latexgoSearchItems],
   )
 
   useEffect(() => {
@@ -432,23 +432,23 @@ function App() {
       })),
     [historySnapshot],
   )
-  const texShelfCategories = useMemo(
-    () => ['All', ...Array.from(new Set(texShelfFormulas.map((formula) => formula.category))).sort()],
+  const latexgoCategories = useMemo(
+    () => ['All', ...Array.from(new Set(latexgoFormulas.map((formula) => formula.category))).sort()],
     [],
   )
-  const isTexShelfPage = pathname.replace(/\/+$/, '') === '/texshelf'
-  const filteredTexShelfFormulas = useMemo(() => {
-    const query = texShelfSearch.trim().toLowerCase()
-    const categoryFiltered = texShelfCategory
-      ? texShelfFormulas.filter((formula) => texShelfCategory === 'All' || formula.category === texShelfCategory)
-      : texShelfFormulas
+  const isLaTeXgOPage = pathname.replace(/\/+$/, '') === '/latexgo'
+  const filteredLaTeXgOFormulas = useMemo(() => {
+    const query = latexgoSearch.trim().toLowerCase()
+    const categoryFiltered = latexgoCategory
+      ? latexgoFormulas.filter((formula) => latexgoCategory === 'All' || formula.category === latexgoCategory)
+      : latexgoFormulas
 
     if (!query) return categoryFiltered
 
     const categoryFilteredIds = new Set(categoryFiltered.map((formula) => formula.id))
 
-    return texShelfFuse.search(query).map((result) => result.item).filter((formula) => categoryFilteredIds.has(formula.id))
-  }, [texShelfCategory, texShelfFuse, texShelfSearch])
+    return latexgoFuse.search(query).map((result) => result.item).filter((formula) => categoryFilteredIds.has(formula.id))
+  }, [latexgoCategory, latexgoFuse, latexgoSearch])
 
   useEffect(() => {
     const handlePopState = () => setPathname(window.location.pathname)
@@ -587,7 +587,7 @@ function App() {
     updateLatex(nextLatex, cursorPosition, cursorPosition, tabStops)
   }
 
-  function insertTexShelfFormula(formula: TexShelfFormula) {
+  function insertLaTeXgOFormula(formula: LaTeXgOFormula) {
     insertTemplate({
       label: formula.title,
       description: formula.description,
@@ -897,61 +897,61 @@ function App() {
     renderFormula(nextOptions)
   }
 
-  if (isTexShelfPage) {
+  if (isLaTeXgOPage) {
     return (
-      <main className="texshelf-page">
-        <header className="texshelf-hero" aria-label="TeXShelf">
-          <div className="texshelf-hero-top">
+      <main className="latexgo-page">
+        <header className="latexgo-hero" aria-label="LaTeXgO">
+          <div className="latexgo-hero-top">
             <div>
-              <p className="eyebrow">LaTeXgO</p>
-              <h1>TeXShelf</h1>
+              <p className="eyebrow">InstaTex</p>
+              <h1>LaTeXgO</h1>
             </div>
-            <button type="button" className="secondary-button texshelf-nav-button" onClick={() => navigate('/')}>
+            <button type="button" className="secondary-button latexgo-nav-button" onClick={() => navigate('/')}>
               Open editor
             </button>
           </div>
 
-          <div className="texshelf-hero-center">
-            <label className="texshelf-search-shell" htmlFor="texshelf-page-search">
+          <div className="latexgo-hero-center">
+            <label className="latexgo-search-shell" htmlFor="latexgo-page-search">
               <span>Search</span>
               <input
-                id="texshelf-page-search"
+                id="latexgo-page-search"
                 type="search"
-                value={texShelfSearch}
-                onChange={(event) => setTexShelfSearch(event.target.value)}
+                value={latexgoSearch}
+                onChange={(event) => setLaTeXgOSearch(event.target.value)}
                 placeholder="maxwell, bayes, pid..."
               />
             </label>
 
-            <div className="texshelf-category-strip" aria-label="TeXShelf categories">
-              {texShelfCategories.map((category) => (
+            <div className="latexgo-category-strip" aria-label="LaTeXgO categories">
+              {latexgoCategories.map((category) => (
                 <button
-                  className={category === texShelfCategory ? 'active' : ''}
+                  className={category === latexgoCategory ? 'active' : ''}
                   key={category}
                   type="button"
-                  aria-pressed={category === texShelfCategory}
-                  onClick={() => setTexShelfCategory(category)}
+                  aria-pressed={category === latexgoCategory}
+                  onClick={() => setLaTeXgOCategory(category)}
                 >
                   {category}
                 </button>
               ))}
             </div>
 
-            <p className="texshelf-count texshelf-count-center" aria-live="polite">
-              {`${filteredTexShelfFormulas.length} result${
-                filteredTexShelfFormulas.length === 1 ? '' : 's'
+            <p className="latexgo-count latexgo-count-center" aria-live="polite">
+              {`${filteredLaTeXgOFormulas.length} result${
+                filteredLaTeXgOFormulas.length === 1 ? '' : 's'
               }`}
             </p>
           </div>
         </header>
 
-        <section className="texshelf-page-results" aria-live="polite">
-          {filteredTexShelfFormulas.length > 0 ? (
-            filteredTexShelfFormulas.map((formula) => (
-              <TexShelfFormulaCard formula={formula} key={formula.id} onUse={insertTexShelfFormula} />
+        <section className="latexgo-page-results" aria-live="polite">
+          {filteredLaTeXgOFormulas.length > 0 ? (
+            filteredLaTeXgOFormulas.map((formula) => (
+              <LaTeXgOFormulaCard formula={formula} key={formula.id} onUse={insertLaTeXgOFormula} />
             ))
           ) : (
-            <p className="texshelf-empty texshelf-empty-page">No matching formulas</p>
+            <p className="latexgo-empty latexgo-empty-page">No matching formulas</p>
           )}
         </section>
       </main>
@@ -960,59 +960,59 @@ function App() {
 
   return (
     <main className="app-shell">
-      <aside className="texshelf-sidebar" aria-label="TeXShelf formula library">
-        <section className="texshelf-panel texshelf-sidebar-panel" aria-label="TeXShelf formulas">
-          <div className="texshelf-heading">
+      <aside className="latexgo-sidebar" aria-label="LaTeXgO formula library">
+        <section className="latexgo-panel latexgo-sidebar-panel" aria-label="LaTeXgO formulas">
+          <div className="latexgo-heading">
             <div>
-              <p className="eyebrow">TeXShelf</p>
-              <h2>{filteredTexShelfFormulas.length} formulas</h2>
+              <p className="eyebrow">LaTeXgO</p>
+              <h2>{filteredLaTeXgOFormulas.length} formulas</h2>
             </div>
           </div>
 
-          <div className="texshelf-controls">
-            <label htmlFor="texshelf-sidebar-search">
+          <div className="latexgo-controls">
+            <label htmlFor="latexgo-sidebar-search">
               Search
               <input
-                id="texshelf-sidebar-search"
+                id="latexgo-sidebar-search"
                 type="search"
-                value={texShelfSearch}
-                onChange={(event) => setTexShelfSearch(event.target.value)}
+                value={latexgoSearch}
+                onChange={(event) => setLaTeXgOSearch(event.target.value)}
                 placeholder="maxwell, bayes, pid..."
               />
             </label>
           </div>
 
-          <div className="texshelf-categories" aria-label="TeXShelf categories">
-            {texShelfCategories.map((category) => (
+          <div className="latexgo-categories" aria-label="LaTeXgO categories">
+            {latexgoCategories.map((category) => (
               <button
-                className={category === texShelfCategory ? 'active' : ''}
+                className={category === latexgoCategory ? 'active' : ''}
                 key={category}
                 type="button"
-                aria-pressed={category === texShelfCategory}
-                onClick={() => setTexShelfCategory(category)}
+                aria-pressed={category === latexgoCategory}
+                onClick={() => setLaTeXgOCategory(category)}
               >
                 {category}
               </button>
             ))}
           </div>
 
-          <p className="texshelf-count" aria-live="polite">
-            {`${filteredTexShelfFormulas.length} result${
-              filteredTexShelfFormulas.length === 1 ? '' : 's'
+          <p className="latexgo-count" aria-live="polite">
+            {`${filteredLaTeXgOFormulas.length} result${
+              filteredLaTeXgOFormulas.length === 1 ? '' : 's'
             }`}
           </p>
 
-          <div className="texshelf-list" aria-live="polite">
-            {filteredTexShelfFormulas.length > 0 ? (
-              filteredTexShelfFormulas.map((formula) => (
-                <TexShelfFormulaCard
+          <div className="latexgo-list" aria-live="polite">
+            {filteredLaTeXgOFormulas.length > 0 ? (
+              filteredLaTeXgOFormulas.map((formula) => (
+                <LaTeXgOFormulaCard
                   formula={formula}
                   key={formula.id}
-                  onUse={insertTexShelfFormula}
+                  onUse={insertLaTeXgOFormula}
                 />
               ))
             ) : (
-              <p className="texshelf-empty">No matching formulas</p>
+              <p className="latexgo-empty">No matching formulas</p>
             )}
           </div>
         </section>
@@ -1021,11 +1021,11 @@ function App() {
       <section className="editor-pane" aria-labelledby="editor-title">
         <div className="app-header">
           <div>
-            <p className="eyebrow">LaTeXgO</p>
-            <h1 id="editor-title">LaTeXgO</h1>
+            <p className="eyebrow">InstaTex</p>
+            <h1 id="editor-title">InstaTex</h1>
           </div>
-          <button type="button" className="secondary-button" onClick={() => navigate('/texshelf')}>
-            TeXShelf
+          <button type="button" className="secondary-button" onClick={() => navigate('/latexgo')}>
+            LaTeXgO
           </button>
         </div>
 

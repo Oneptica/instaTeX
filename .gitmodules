@@ -1,3 +1,3 @@
-[submodule "TexShelf"]
-	path = TexShelf
-	url = https://github.com/tzhaoo/TexShelf.git
+[submodule "LaTeXgO"]
+	path = LaTeXgO
+	url = https://github.com/tzhaoo/LaTeXgO.git

@@ -2,17 +2,17 @@
 
 Thanks for considering a contribution.
 
-The best first contribution is usually a TeXShelf formula entry. TeXShelf lives in `TexShelf/` and is the open formula library used by LaTeXgO.
+The best first contribution is usually a LaTeXgO formula entry. LaTeXgO lives in `LaTeXgO/` and is the open formula library used by InstaTex.
 
 ## Formula Contributions
 
-1. Choose the closest file under `TexShelf/formulas/<category>/<subcategory>.json`.
-2. Add one formula entry following `TexShelf/schema.json`.
+1. Choose the closest file under `LaTeXgO/formulas/<category>/<subcategory>.json`.
+2. Add one formula entry following `LaTeXgO/schema.json`.
 3. Keep `id` unique, stable, lowercase, and hyphenated.
 4. Keep `category` and `subcategory` aligned with the folder and filename.
 5. Use TeX source only.
 6. Add useful tags.
-7. Run `npm run validate:texshelf`.
+7. Run `npm run validate:latexgo`.
 
 Good entries are small, reusable formulas from common math, physics, chemistry, or related subjects.
 
@@ -29,7 +29,7 @@ Good entries are small, reusable formulas from common math, physics, chemistry, 
 Before opening a PR, run:
 
 ```bash
-npm run validate:texshelf
+npm run validate:latexgo
 npm run lint
 npm run build
 ```
@@ -38,6 +38,6 @@ The validator checks JSON shape, required fields, duplicate IDs, supported categ
 
 ## License
 
-TeXShelf formula data is licensed in the TeXShelf repository. See `TexShelf/README.md` for the current terms.
+LaTeXgO formula data is licensed in the LaTeXgO repository. See `LaTeXgO/README.md` for the current terms.
 
-LaTeXgO application code licensing is controlled separately by the project owner.
+InstaTex application code licensing is controlled separately by the project owner.

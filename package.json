@@ -1,5 +1,5 @@
 {
-  "name": "latexgo",
+  "name": "instatex",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "generate:symbols": "node scripts/generate-symbol-assets.mjs",
-    "validate:texshelf": "node scripts/validate-texshelf.mjs"
+    "validate:latexgo": "node scripts/validate-latexgo.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.1",

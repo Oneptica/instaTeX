@@ -22,5 +22,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "TexShelf/**/*.json"]
+  "include": ["src", "LaTeXgO/**/*.json"]
 }

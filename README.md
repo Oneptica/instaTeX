@@ -1,6 +1,6 @@
-# LaTeXgO
+# InstaTex
 
-LaTeXgO is a lightweight TeX equation editor for writing, previewing, and exporting formulas as SVG or PNG.
+InstaTex is a lightweight TeX equation editor for writing, previewing, and exporting formulas as SVG or PNG.
 
 The app includes:
 
@@ -8,16 +8,16 @@ The app includes:
 - TeX input with autocomplete and syntax highlighting
 - SVG/PNG export
 - reusable templates for common math, physics, and chemistry notation
-- TeXShelf formula library integration
+- LaTeXgO formula library integration
 
-## TeXShelf
+## LaTeXgO
 
-TeXShelf is the formula library used by LaTeXgO.
+LaTeXgO is the formula library used by InstaTex.
 
 Formula data lives in:
 
 ```txt
-TexShelf/
+LaTeXgO/
   formulas/
     algebra/
       equations.json
@@ -31,9 +31,9 @@ TexShelf/
   schema.json
 ```
 
-LaTeXgO reads every JSON file under `TexShelf/formulas/` and turns entries into insertable examples in the editor.
+InstaTex reads every JSON file under `LaTeXgO/formulas/` and turns entries into insertable examples in the editor.
 
-See [TexShelf/README.md](TexShelf/README.md) for the formula format and contribution rules.
+See [LaTeXgO/README.md](LaTeXgO/README.md) for the formula format and contribution rules.
 
 ## Development
 

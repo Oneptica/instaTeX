@@ -14,7 +14,7 @@ export type LatexGroup = {
   templates: LatexTemplate[]
 }
 
-export type TexShelfFormula = {
+export type LaTeXgOFormula = {
   id: string
   title: string
   category: string
@@ -25,17 +25,17 @@ export type TexShelfFormula = {
   source?: string
 }
 
-const texShelfFormulaModules = import.meta.glob('../../TexShelf/formulas/**/*.json', {
+const latexgoFormulaModules = import.meta.glob('../../LaTeXgO/formulas/**/*.json', {
   eager: true,
   import: 'default',
-}) as Record<string, TexShelfFormula[]>
+}) as Record<string, LaTeXgOFormula[]>
 
-export const texShelfFormulas = Object.entries(texShelfFormulaModules)
+export const latexgoFormulas = Object.entries(latexgoFormulaModules)
   .sort(([left], [right]) => left.localeCompare(right))
   .flatMap(([, formulas]) => formulas)
 
 function formulasToTemplates(categories: string[]): LatexTemplate[] {
-  return texShelfFormulas
+  return latexgoFormulas
     .filter((formula) => categories.includes(formula.category))
     .map((formula) => ({
       label: formula.title,

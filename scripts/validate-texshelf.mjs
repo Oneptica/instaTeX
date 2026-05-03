@@ -4,9 +4,9 @@ import process from 'node:process'
 import Ajv2020 from 'ajv/dist/2020.js'
 
 const root = process.cwd()
-const texshelfRoot = path.join(root, 'TexShelf')
-const schemaPath = path.join(texshelfRoot, 'schema.json')
-const texshelfBuckets = [
+const latexgoRoot = path.join(root, 'LaTeXgO')
+const schemaPath = path.join(latexgoRoot, 'schema.json')
+const latexgoBuckets = [
   { name: 'formulas', label: 'formula' },
   { name: 'plots', label: 'plot' },
 ]
@@ -53,8 +53,8 @@ async function main() {
   const validateFormulaFile = ajv.compile(schema)
   const files = []
 
-  for (const bucket of texshelfBuckets) {
-    const bucketPath = path.join(texshelfRoot, bucket.name)
+  for (const bucket of latexgoBuckets) {
+    const bucketPath = path.join(latexgoRoot, bucket.name)
 
     try {
       files.push(...(await getJsonFiles(bucketPath)))
@@ -69,7 +69,7 @@ async function main() {
   let entryCount = 0
 
   for (const fullPath of files) {
-    const relativePath = path.relative(texshelfRoot, fullPath)
+    const relativePath = path.relative(latexgoRoot, fullPath)
     const pathParts = relativePath.split(path.sep)
 
     if (pathParts.length !== 3) {
@@ -80,7 +80,7 @@ async function main() {
     }
 
     const [bucketName, categorySlug, fileName] = pathParts
-    const bucket = texshelfBuckets.find((entry) => entry.name === bucketName)
+    const bucket = latexgoBuckets.find((entry) => entry.name === bucketName)
 
     if (!bucket) {
       errors.push(`${relativePath}: unsupported data bucket "${bucketName}".`)
@@ -131,13 +131,13 @@ async function main() {
   }
 
   if (errors.length > 0) {
-    console.error(`TeXShelf validation failed with ${errors.length} error(s):`)
+    console.error(`LaTeXgO validation failed with ${errors.length} error(s):`)
     for (const error of errors) console.error(`- ${error}`)
     process.exitCode = 1
     return
   }
 
-  console.log(`TeXShelf validation passed: ${entryCount} entries in ${files.length} files.`)
+  console.log(`LaTeXgO validation passed: ${entryCount} entries in ${files.length} files.`)
 }
 
 await main()
