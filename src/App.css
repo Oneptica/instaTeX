@@ -1,14 +1,21 @@
 .app-shell {
   --radius: 4px;
   min-height: 100svh;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1120px);
+  gap: 16px;
   justify-content: center;
+  align-items: start;
+  box-sizing: border-box;
+  padding: 0 24px;
   background: var(--canvas);
   color: var(--text);
 }
 
 .editor-pane {
-  width: min(1120px, 100%);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -125,6 +132,22 @@
   margin: 0;
   color: var(--muted);
   font: 600 12px/1.2 var(--sans);
+}
+
+.texshelf-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 28px 0 36px;
+}
+
+.texshelf-sidebar-panel {
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  box-sizing: border-box;
 }
 
 .input-label {
@@ -263,6 +286,60 @@
   overflow: visible;
 }
 
+.texshelf-sidebar-panel::after {
+  display: none;
+}
+
+.texshelf-sidebar-panel .texshelf-controls {
+  grid-template-columns: 1fr;
+}
+
+.texshelf-sidebar-panel .texshelf-categories {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.texshelf-sidebar-panel .texshelf-categories button {
+  min-width: 0;
+  padding: 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.texshelf-sidebar-panel .texshelf-list {
+  grid-template-columns: 1fr;
+  max-height: none;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.texshelf-sidebar-panel .texshelf-card {
+  gap: 8px;
+  padding: 10px;
+}
+
+.texshelf-sidebar-panel .texshelf-preview {
+  min-height: auto;
+  max-height: none;
+  padding: 10px;
+}
+
+.texshelf-sidebar-panel .texshelf-code-row code {
+  max-height: none;
+  min-height: 0;
+  font-size: 11px;
+}
+
+.texshelf-sidebar-panel .texshelf-card-actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.texshelf-sidebar-panel .texshelf-card-actions button {
+  width: 100%;
+  padding: 0 8px;
+}
+
 .texshelf-count {
   margin: -4px 0 0;
   color: var(--muted);
@@ -280,37 +357,22 @@
 }
 
 .texshelf-card-main {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.texshelf-title-button {
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  color: var(--heading);
-  background: transparent;
-  font: 600 14px/1.25 var(--sans);
-  text-align: left;
-}
-
-.texshelf-title-button:hover:not(:disabled) {
-  color: var(--button);
-  background: transparent;
+  min-width: 0;
+  display: block;
 }
 
 .texshelf-card h3 {
   margin: 0;
   color: var(--heading);
   font: 600 14px/1.25 var(--sans);
+  text-align: left;
 }
 
 .texshelf-card p {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: var(--muted);
   font: 12px/1.35 var(--sans);
+  text-align: left;
 }
 
 .texshelf-card button {
@@ -321,10 +383,10 @@
 }
 
 .texshelf-preview {
-  min-height: 82px;
+  min-height: 0;
   display: grid;
   place-items: center;
-  overflow: auto;
+  overflow: visible;
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -333,6 +395,13 @@
 
 .texshelf-preview svg {
   max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.texshelf-preview mjx-container {
+  max-width: 100%;
+  overflow: visible;
 }
 
 .texshelf-preview span {
@@ -350,7 +419,7 @@
 .texshelf-code-row code {
   min-height: 42px;
   display: block;
-  overflow: hidden;
+  overflow: visible;
   padding: 9px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1088,6 +1157,26 @@ button:disabled {
 }
 
 @media (max-width: 820px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0;
+  }
+
+  .texshelf-sidebar {
+    position: static;
+    height: auto;
+    padding: 18px 18px 0;
+  }
+
+  .texshelf-sidebar-panel {
+    max-height: none;
+  }
+
+  .texshelf-sidebar-panel .texshelf-list {
+    max-height: 420px;
+  }
+
   .editor-pane {
     padding: 24px 18px 28px;
     border-top: 1px solid var(--border);

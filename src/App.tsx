@@ -185,11 +185,9 @@ let texShelfPreviewQueue = Promise.resolve()
 
 function TexShelfFormulaCard({
   formula,
-  onOpen,
   onUse,
 }: {
   formula: TexShelfFormula
-  onOpen: (formula: TexShelfFormula) => void
   onUse: (formula: TexShelfFormula) => void
 }) {
   const previewRef = useRef<HTMLDivElement>(null)
@@ -233,11 +231,7 @@ function TexShelfFormulaCard({
   return (
     <article className="texshelf-card">
       <div className="texshelf-card-main">
-        <div>
-          <button className="texshelf-title-button" type="button" onClick={() => onOpen(formula)}>
-            {formula.title}
-          </button>
-        </div>
+        <h3>{formula.title}</h3>
       </div>
       {formula.description ? <p>{formula.description}</p> : null}
       <div className="texshelf-preview" ref={previewRef} aria-label={`${formula.title} preview`}>
@@ -606,10 +600,6 @@ function App() {
       description: formula.description,
       prefix: formula.latex,
     })
-  }
-
-  function openTexShelfFormula(formula: TexShelfFormula) {
-    navigateTo('texshelf', formula.id)
   }
 
   function closeMenuFromClick(event: MouseEvent<HTMLElement>) {
@@ -1013,7 +1003,6 @@ function App() {
                     <TexShelfFormulaCard
                       formula={formula}
                       key={formula.id}
-                      onOpen={openTexShelfFormula}
                       onUse={insertTexShelfFormula}
                     />
                   ))
@@ -1030,15 +1019,91 @@ function App() {
 
   return (
     <main className="app-shell">
+      <aside className="texshelf-sidebar" aria-label="TeXShelf formula library">
+        <section className="texshelf-panel texshelf-sidebar-panel" aria-label="TeXShelf formulas">
+          <div className="texshelf-heading">
+            <div>
+              <p className="eyebrow">{selectedTexShelfFormula ? 'Formula' : 'TeXShelf'}</p>
+              <h2>
+                {selectedTexShelfFormula
+                  ? selectedTexShelfFormula.title
+                  : `${filteredTexShelfFormulas.length} formulas`}
+              </h2>
+            </div>
+            {selectedTexShelfFormula ? (
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => setCurrentFormulaId('')}
+              >
+                All
+              </button>
+            ) : null}
+          </div>
+
+          <div className="texshelf-controls">
+            <label htmlFor="texshelf-sidebar-search">
+              Search
+              <input
+                id="texshelf-sidebar-search"
+                type="search"
+                value={texShelfSearch}
+                onChange={(event) => {
+                  setTexShelfSearch(event.target.value)
+                  setCurrentFormulaId('')
+                }}
+                placeholder="maxwell, bayes, pid..."
+              />
+            </label>
+          </div>
+
+          <div className="texshelf-categories" aria-label="TeXShelf categories">
+            {texShelfCategories.map((category) => (
+              <button
+                className={category === texShelfCategory && !selectedTexShelfFormula ? 'active' : ''}
+                key={category}
+                type="button"
+                aria-pressed={category === texShelfCategory && !selectedTexShelfFormula}
+                onClick={() => {
+                  setTexShelfCategory(category)
+                  setCurrentFormulaId('')
+                }}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          <p className="texshelf-count" aria-live="polite">
+            {selectedTexShelfFormula
+              ? selectedTexShelfFormula.subcategory
+              : `${filteredTexShelfFormulas.length} result${
+                  filteredTexShelfFormulas.length === 1 ? '' : 's'
+                }`}
+          </p>
+
+          <div className="texshelf-list" aria-live="polite">
+            {filteredTexShelfFormulas.length > 0 ? (
+              filteredTexShelfFormulas.map((formula) => (
+                <TexShelfFormulaCard
+                  formula={formula}
+                  key={formula.id}
+                  onUse={insertTexShelfFormula}
+                />
+              ))
+            ) : (
+              <p className="texshelf-empty">No matching formulas</p>
+            )}
+          </div>
+        </section>
+      </aside>
+
       <section className="editor-pane" aria-labelledby="editor-title">
         <div className="app-header">
           <div>
             <p className="eyebrow">LaTeXgO</p>
             <h1 id="editor-title">TeX to SVG</h1>
           </div>
-          <button type="button" className="secondary-button" onClick={() => navigateTo('texshelf')}>
-            Open TeXShelf
-          </button>
         </div>
 
         <label className="input-label" htmlFor="latex-input">
@@ -1053,15 +1118,15 @@ function App() {
             <button type="button" title="Redo" onClick={redoLatex} disabled={!canRedo}>
               Redo
             </button>
+            <button type="button" onClick={resetLatex}>
+              Clear
+            </button>
             <span className="github-divider" aria-hidden="true" />
             <button type="button" onClick={() => renderFormula()} disabled={isRendering}>
               {isRendering ? 'Rendering' : 'Render'}
             </button>
             <button type="button" onClick={removeLineBreaks}>
               One line
-            </button>
-            <button type="button" onClick={resetLatex}>
-              Reset
             </button>
             <span className="github-divider" aria-hidden="true" />
             <label className="toolbar-checkbox">
