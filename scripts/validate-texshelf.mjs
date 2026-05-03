@@ -5,8 +5,11 @@ import Ajv2020 from 'ajv/dist/2020.js'
 
 const root = process.cwd()
 const texshelfRoot = path.join(root, 'TexShelf')
-const texshelfDir = path.join(texshelfRoot, 'formulas')
 const schemaPath = path.join(texshelfRoot, 'schema.json')
+const texshelfBuckets = [
+  { name: 'formulas', label: 'formula' },
+  { name: 'plots', label: 'plot' },
+]
 
 function titleFromSlug(slug) {
   return slug
@@ -16,7 +19,7 @@ function titleFromSlug(slug) {
     .join(' ')
 }
 
-async function getFormulaFiles(directory) {
+async function getJsonFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true })
   const files = []
 
@@ -24,7 +27,7 @@ async function getFormulaFiles(directory) {
     const entryPath = path.join(directory, entry.name)
 
     if (entry.isDirectory()) {
-      files.push(...(await getFormulaFiles(entryPath)))
+      files.push(...(await getJsonFiles(entryPath)))
     } else if (entry.isFile() && entry.name.endsWith('.json') && entry.name !== 'schema.json') {
       files.push(entryPath)
     }
@@ -48,21 +51,42 @@ async function main() {
   const schema = JSON.parse(await readFile(schemaPath, 'utf8'))
   const ajv = new Ajv2020({ allErrors: true })
   const validateFormulaFile = ajv.compile(schema)
-  const files = await getFormulaFiles(texshelfDir)
+  const files = []
+
+  for (const bucket of texshelfBuckets) {
+    const bucketPath = path.join(texshelfRoot, bucket.name)
+
+    try {
+      files.push(...(await getJsonFiles(bucketPath)))
+    } catch (error) {
+      if (error.code === 'ENOENT') continue
+      throw error
+    }
+  }
+
   const errors = []
   const ids = new Set()
-  let formulaCount = 0
+  let entryCount = 0
 
   for (const fullPath of files) {
-    const relativePath = path.relative(texshelfDir, fullPath)
+    const relativePath = path.relative(texshelfRoot, fullPath)
     const pathParts = relativePath.split(path.sep)
 
-    if (pathParts.length !== 2) {
-      errors.push(`${relativePath}: formula files must live at formulas/<category>/<subcategory>.json.`)
+    if (pathParts.length !== 3) {
+      errors.push(
+        `${relativePath}: data files must live at formulas|plots/<category>/<subcategory>.json.`,
+      )
       continue
     }
 
-    const [categorySlug, fileName] = pathParts
+    const [bucketName, categorySlug, fileName] = pathParts
+    const bucket = texshelfBuckets.find((entry) => entry.name === bucketName)
+
+    if (!bucket) {
+      errors.push(`${relativePath}: unsupported data bucket "${bucketName}".`)
+      continue
+    }
+
     const expectedCategory = titleFromSlug(categorySlug)
     const expectedSubcategory = titleFromSlug(path.basename(fileName, '.json'))
     let entries
@@ -80,7 +104,7 @@ async function main() {
     }
 
     entries.forEach((entry, index) => {
-      formulaCount += 1
+      entryCount += 1
 
       if (entry.category !== expectedCategory) {
         errors.push(
@@ -98,6 +122,10 @@ async function main() {
         errors.push(`${relativePath}[${index}]: duplicate id "${entry.id}".`)
       }
 
+      if (entry.kind && entry.kind !== bucket.label) {
+        errors.push(`${relativePath}[${index}]: kind "${entry.kind}" must match bucket "${bucket.label}".`)
+      }
+
       ids.add(entry.id)
     })
   }
@@ -109,7 +137,7 @@ async function main() {
     return
   }
 
-  console.log(`TeXShelf validation passed: ${formulaCount} formulas in ${files.length} files.`)
+  console.log(`TeXShelf validation passed: ${entryCount} entries in ${files.length} files.`)
 }
 
 await main()
