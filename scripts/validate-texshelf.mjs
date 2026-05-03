@@ -4,7 +4,7 @@ import process from 'node:process'
 
 const root = process.cwd()
 const texshelfDir = path.join(root, 'TexShelf', 'formulas')
-const requiredFields = ['id', 'title', 'category', 'latex', 'tags']
+const requiredFields = ['id', 'title', 'category', 'subcategory', 'latex', 'tags']
 const categories = new Set([
   'Algebra',
   'Calculus',
@@ -12,8 +12,19 @@ const categories = new Set([
   'Probability',
   'Physics',
   'Chemistry',
+  'Control Theory',
+  'Signal Processing',
+  'Image Processing',
 ])
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+function titleFromSlug(slug) {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
 
 function checkString(entry, field, errors, location) {
   if (typeof entry[field] !== 'string' || entry[field].trim() === '') {
@@ -21,7 +32,7 @@ function checkString(entry, field, errors, location) {
   }
 }
 
-function validateEntry(entry, errors, ids, location) {
+function validateEntry(entry, errors, ids, location, expectedCategory, expectedSubcategory) {
   if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
     errors.push(`${location}: entry must be an object.`)
     return
@@ -34,6 +45,7 @@ function validateEntry(entry, errors, ids, location) {
   checkString(entry, 'id', errors, location)
   checkString(entry, 'title', errors, location)
   checkString(entry, 'category', errors, location)
+  checkString(entry, 'subcategory', errors, location)
   checkString(entry, 'latex', errors, location)
 
   if (typeof entry.id === 'string' && !idPattern.test(entry.id)) {
@@ -51,8 +63,12 @@ function validateEntry(entry, errors, ids, location) {
     errors.push(`${location}: unsupported category "${entry.category}".`)
   }
 
-  if ('subcategory' in entry && typeof entry.subcategory !== 'string') {
-    errors.push(`${location}: "subcategory" must be a string when present.`)
+  if (typeof entry.category === 'string' && entry.category !== expectedCategory) {
+    errors.push(`${location}: category "${entry.category}" must match folder "${expectedCategory}".`)
+  }
+
+  if (typeof entry.subcategory === 'string' && entry.subcategory !== expectedSubcategory) {
+    errors.push(`${location}: subcategory "${entry.subcategory}" must match file "${expectedSubcategory}".`)
   }
 
   if ('description' in entry && typeof entry.description !== 'string') {
@@ -89,32 +105,59 @@ function validateEntry(entry, errors, ids, location) {
   }
 }
 
-async function main() {
-  const files = (await readdir(texshelfDir))
-    .filter((file) => file.endsWith('.json') && file !== 'schema.json')
-    .sort()
+async function getFormulaFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true })
+  const files = []
 
+  for (const entry of entries) {
+    const entryPath = path.join(directory, entry.name)
+
+    if (entry.isDirectory()) {
+      files.push(...(await getFormulaFiles(entryPath)))
+    } else if (entry.isFile() && entry.name.endsWith('.json') && entry.name !== 'schema.json') {
+      files.push(entryPath)
+    }
+  }
+
+  return files.sort()
+}
+
+async function main() {
+  const files = await getFormulaFiles(texshelfDir)
   const errors = []
   const ids = new Set()
 
-  for (const file of files) {
-    const fullPath = path.join(texshelfDir, file)
+  for (const fullPath of files) {
+    const relativePath = path.relative(texshelfDir, fullPath)
+    const pathParts = relativePath.split(path.sep)
+
+    if (pathParts.length !== 2) {
+      errors.push(`${relativePath}: formula files must live at formulas/<category>/<subcategory>.json.`)
+      continue
+    }
+
+    const [categorySlug, fileName] = pathParts
+    const subcategorySlug = path.basename(fileName, '.json')
+    const expectedCategory = titleFromSlug(categorySlug)
+    const expectedSubcategory = titleFromSlug(subcategorySlug)
     const content = await readFile(fullPath, 'utf8')
     let entries
 
     try {
       entries = JSON.parse(content)
     } catch (error) {
-      errors.push(`${file}: invalid JSON: ${error.message}`)
+      errors.push(`${relativePath}: invalid JSON: ${error.message}`)
       continue
     }
 
     if (!Array.isArray(entries)) {
-      errors.push(`${file}: root value must be an array.`)
+      errors.push(`${relativePath}: root value must be an array.`)
       continue
     }
 
-    entries.forEach((entry, index) => validateEntry(entry, errors, ids, `${file}[${index}]`))
+    entries.forEach((entry, index) =>
+      validateEntry(entry, errors, ids, `${relativePath}[${index}]`, expectedCategory, expectedSubcategory),
+    )
   }
 
   if (errors.length > 0) {

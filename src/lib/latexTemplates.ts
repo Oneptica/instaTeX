@@ -1,8 +1,3 @@
-import algebraFormulas from '../../TexShelf/formulas/algebra.json'
-import calculusFormulas from '../../TexShelf/formulas/calculus.json'
-import chemistryFormulas from '../../TexShelf/formulas/chemistry.json'
-import physicsFormulas from '../../TexShelf/formulas/physics.json'
-
 export type LatexTemplate = {
   label: string
   description?: string
@@ -29,12 +24,14 @@ export type TexShelfFormula = {
   source?: string
 }
 
-export const texShelfFormulas = [
-  ...(algebraFormulas as TexShelfFormula[]),
-  ...(calculusFormulas as TexShelfFormula[]),
-  ...(physicsFormulas as TexShelfFormula[]),
-  ...(chemistryFormulas as TexShelfFormula[]),
-]
+const texShelfFormulaModules = import.meta.glob('../../TexShelf/formulas/**/*.json', {
+  eager: true,
+  import: 'default',
+}) as Record<string, TexShelfFormula[]>
+
+export const texShelfFormulas = Object.entries(texShelfFormulaModules)
+  .sort(([left], [right]) => left.localeCompare(right))
+  .flatMap(([, formulas]) => formulas)
 
 function formulasToTemplates(categories: string[]): LatexTemplate[] {
   return texShelfFormulas

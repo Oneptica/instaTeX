@@ -6,12 +6,13 @@ The best first contribution is usually a TeXShelf formula entry. TeXShelf lives 
 
 ## Formula Contributions
 
-1. Choose the closest JSON file in `TexShelf/formulas/`.
+1. Choose the closest file under `TexShelf/formulas/<category>/<subcategory>.json`.
 2. Add one formula entry following `TexShelf/schema.json`.
 3. Keep `id` unique, stable, lowercase, and hyphenated.
-4. Use TeX source only.
-5. Add useful tags.
-6. Run `npm run validate:texshelf`.
+4. Keep `category` and `subcategory` aligned with the folder and filename.
+5. Use TeX source only.
+6. Add useful tags.
+7. Run `npm run validate:texshelf`.
 
 Good entries are small, reusable formulas from common math, physics, chemistry, or related subjects.
 

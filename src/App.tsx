@@ -922,7 +922,7 @@ function App() {
             <div>
               <p className="eyebrow">TeXShelf</p>
               <h1 id="library-title">Formula library</h1>
-              <p>Open reusable TeX formulas for math, physics, and chemistry.</p>
+              <p>Open reusable TeX formulas for math, physics, and more.</p>
             </div>
             <div className="library-actions">
               <a

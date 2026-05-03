@@ -19,14 +19,19 @@ Formula data lives in:
 ```txt
 TexShelf/
   formulas/
-    algebra.json
-    calculus.json
-    physics.json
-    chemistry.json
+    algebra/
+      equations.json
+      piecewise.json
+    calculus/
+      derivatives.json
+      integrals.json
+    physics/
+      mechanics.json
+      electromagnetism.json
   schema.json
 ```
 
-LaTeXgO reads those JSON files and turns entries into insertable examples in the editor.
+LaTeXgO reads every JSON file under `TexShelf/formulas/` and turns entries into insertable examples in the editor.
 
 See [TexShelf/README.md](TexShelf/README.md) for the formula format and contribution rules.
 
