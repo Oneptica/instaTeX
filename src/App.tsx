@@ -26,25 +26,15 @@ const starterLatex = ''
 const visibleToolbarTemplateCount = 4
 
 const historyStorageKey = 'latexgo.history'
+const exportFileBaseName = 'latexgo-formula'
 
 type ExportBackground = 'transparent' | 'white' | 'black' | 'custom'
-type AppPage = 'editor' | 'texshelf'
 
 type AutocompleteItem = {
   label: string
   value: string
   description: string
   tabStops?: number[]
-}
-
-function getInitialPage(): AppPage {
-  return window.location.pathname.startsWith('/texshelf') ? 'texshelf' : 'editor'
-}
-
-function getInitialFormulaId() {
-  const [, page, formulaId] = window.location.pathname.split('/')
-
-  return page === 'texshelf' ? formulaId ?? '' : ''
 }
 
 const autocompleteItems: AutocompleteItem[] = [
@@ -360,8 +350,6 @@ function getNavigationStops(input: string) {
 
 function App() {
   const initialHistory = useMemo(() => readStoredStringArray(historyStorageKey, [starterLatex]), [])
-  const [currentPage, setCurrentPage] = useState<AppPage>(() => getInitialPage())
-  const [currentFormulaId, setCurrentFormulaId] = useState(() => getInitialFormulaId())
   const [latex, setLatex] = useState(initialHistory[initialHistory.length - 1] ?? starterLatex)
   const [display, setDisplay] = useState(true)
   const [font, setFont] = useState<MathJaxFont>('mathjax-newcm')
@@ -381,7 +369,6 @@ function App() {
   const [texShelfCategory, setTexShelfCategory] = useState('All')
   const [exportBackground, setExportBackground] = useState<ExportBackground>('transparent')
   const [customBackground, setCustomBackground] = useState('#f5f5f7')
-  const [fileName, setFileName] = useState('latexgo-formula')
   const editorFrameRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<EditorView | null>(null)
   const outputRef = useRef<HTMLDivElement>(null)
@@ -417,13 +404,7 @@ function App() {
     () => ['All', ...Array.from(new Set(texShelfFormulas.map((formula) => formula.category))).sort()],
     [],
   )
-  const selectedTexShelfFormula = useMemo(
-    () => texShelfFormulas.find((formula) => formula.id === currentFormulaId),
-    [currentFormulaId],
-  )
   const filteredTexShelfFormulas = useMemo(() => {
-    if (selectedTexShelfFormula) return [selectedTexShelfFormula]
-
     const query = texShelfSearch.trim().toLowerCase()
 
     return texShelfFormulas.filter((formula) => {
@@ -447,26 +428,7 @@ function App() {
 
       return haystack.includes(query)
     })
-  }, [selectedTexShelfFormula, texShelfCategory, texShelfSearch])
-
-  function navigateTo(page: AppPage, formulaId = '') {
-    const path = page === 'texshelf' ? `/texshelf${formulaId ? `/${formulaId}` : ''}` : '/'
-
-    window.history.pushState({}, '', path)
-    setCurrentPage(page)
-    setCurrentFormulaId(page === 'texshelf' ? formulaId : '')
-  }
-
-  useEffect(() => {
-    function handlePopState() {
-      setCurrentPage(getInitialPage())
-      setCurrentFormulaId(getInitialFormulaId())
-    }
-
-    window.addEventListener('popstate', handlePopState)
-
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+  }, [texShelfCategory, texShelfSearch])
 
   function syncHistoryState() {
     setHistorySnapshot([...historyRef.current])
@@ -589,12 +551,6 @@ function App() {
   }
 
   function insertTexShelfFormula(formula: TexShelfFormula) {
-    if (currentPage === 'texshelf') {
-      navigateTo('editor')
-      updateLatex(formula.latex, formula.latex.length)
-      return
-    }
-
     insertTemplate({
       label: formula.title,
       description: formula.description,
@@ -773,7 +729,7 @@ function App() {
       window.clearTimeout(timeout)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, latex, renderOptions])
+  }, [latex, renderOptions])
 
   async function copyLatex() {
     if (!latex) return
@@ -800,9 +756,7 @@ function App() {
   }
 
   function getDownloadName(extension: string) {
-    const cleanedName = fileName.trim().replace(/[\\/:*?"<>|]+/g, '-') || 'latexgo-formula'
-
-    return `${cleanedName}.${extension}`
+    return `${exportFileBaseName}.${extension}`
   }
 
   function downloadSvg() {
@@ -904,141 +858,15 @@ function App() {
     renderFormula(nextOptions)
   }
 
-  if (currentPage === 'texshelf') {
-    return (
-      <main className="library-shell">
-        <section className="library-page" aria-labelledby="library-title">
-          <header className="library-header">
-            <div>
-              <p className="eyebrow">TeXShelf</p>
-              <h1 id="library-title">Formula library</h1>
-              <p>Open reusable TeX formulas for math, physics, and more.</p>
-            </div>
-            <div className="library-actions">
-              <a
-                className="secondary-button link-button"
-                href="https://github.com/tzhaoo/LaTeXgO"
-                rel="noreferrer"
-                target="_blank"
-              >
-                Contribute on GitHub
-              </a>
-              <button type="button" className="secondary-button" onClick={() => navigateTo('editor')}>
-                LaTeXgO editor
-              </button>
-            </div>
-          </header>
-
-          <div className="library-layout">
-            <aside className="library-sidebar" aria-label="TeXShelf filters">
-              <p>Domains</p>
-              <div className="texshelf-categories" aria-label="TeXShelf categories">
-                {texShelfCategories.map((category) => (
-                  <button
-                    className={category === texShelfCategory && !selectedTexShelfFormula ? 'active' : ''}
-                    key={category}
-                    type="button"
-                    aria-pressed={category === texShelfCategory && !selectedTexShelfFormula}
-                    onClick={() => {
-                      setTexShelfCategory(category)
-                      setCurrentFormulaId('')
-                      window.history.pushState({}, '', '/texshelf')
-                    }}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </aside>
-
-            <section className="texshelf-panel texshelf-page-panel" aria-label="TeXShelf formulas">
-              <div className="texshelf-heading">
-                <div>
-                  <p className="eyebrow">{selectedTexShelfFormula ? 'Formula' : 'Browse'}</p>
-                  <h2>
-                    {selectedTexShelfFormula
-                      ? selectedTexShelfFormula.title
-                      : `${filteredTexShelfFormulas.length} formulas`}
-                  </h2>
-                </div>
-                {selectedTexShelfFormula ? (
-                  <button
-                    type="button"
-                    className="secondary-button"
-                    onClick={() => navigateTo('texshelf')}
-                  >
-                    All formulas
-                  </button>
-                ) : null}
-              </div>
-
-              <div className="texshelf-controls">
-                <label htmlFor="texshelf-search">
-                  Search formulas
-                  <input
-                    id="texshelf-search"
-                    type="search"
-                    value={texShelfSearch}
-                    onChange={(event) => {
-                      setTexShelfSearch(event.target.value)
-                      setCurrentFormulaId('')
-                      window.history.pushState({}, '', '/texshelf')
-                    }}
-                    placeholder="maxwell, bayes, system..."
-                  />
-                </label>
-              </div>
-
-              <p className="texshelf-count" aria-live="polite">
-                {selectedTexShelfFormula
-                  ? `/texshelf/${selectedTexShelfFormula.id}`
-                  : `${filteredTexShelfFormulas.length} result${
-                      filteredTexShelfFormulas.length === 1 ? '' : 's'
-                    }`}
-              </p>
-
-              <div className="texshelf-list" aria-live="polite">
-                {filteredTexShelfFormulas.length > 0 ? (
-                  filteredTexShelfFormulas.map((formula) => (
-                    <TexShelfFormulaCard
-                      formula={formula}
-                      key={formula.id}
-                      onUse={insertTexShelfFormula}
-                    />
-                  ))
-                ) : (
-                  <p className="texshelf-empty">No matching formulas</p>
-                )}
-              </div>
-            </section>
-          </div>
-        </section>
-      </main>
-    )
-  }
-
   return (
     <main className="app-shell">
       <aside className="texshelf-sidebar" aria-label="TeXShelf formula library">
         <section className="texshelf-panel texshelf-sidebar-panel" aria-label="TeXShelf formulas">
           <div className="texshelf-heading">
             <div>
-              <p className="eyebrow">{selectedTexShelfFormula ? 'Formula' : 'TeXShelf'}</p>
-              <h2>
-                {selectedTexShelfFormula
-                  ? selectedTexShelfFormula.title
-                  : `${filteredTexShelfFormulas.length} formulas`}
-              </h2>
+              <p className="eyebrow">TeXShelf</p>
+              <h2>{filteredTexShelfFormulas.length} formulas</h2>
             </div>
-            {selectedTexShelfFormula ? (
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => setCurrentFormulaId('')}
-              >
-                All
-              </button>
-            ) : null}
           </div>
 
           <div className="texshelf-controls">
@@ -1048,10 +876,7 @@ function App() {
                 id="texshelf-sidebar-search"
                 type="search"
                 value={texShelfSearch}
-                onChange={(event) => {
-                  setTexShelfSearch(event.target.value)
-                  setCurrentFormulaId('')
-                }}
+                onChange={(event) => setTexShelfSearch(event.target.value)}
                 placeholder="maxwell, bayes, pid..."
               />
             </label>
@@ -1060,14 +885,11 @@ function App() {
           <div className="texshelf-categories" aria-label="TeXShelf categories">
             {texShelfCategories.map((category) => (
               <button
-                className={category === texShelfCategory && !selectedTexShelfFormula ? 'active' : ''}
+                className={category === texShelfCategory ? 'active' : ''}
                 key={category}
                 type="button"
-                aria-pressed={category === texShelfCategory && !selectedTexShelfFormula}
-                onClick={() => {
-                  setTexShelfCategory(category)
-                  setCurrentFormulaId('')
-                }}
+                aria-pressed={category === texShelfCategory}
+                onClick={() => setTexShelfCategory(category)}
               >
                 {category}
               </button>
@@ -1075,11 +897,9 @@ function App() {
           </div>
 
           <p className="texshelf-count" aria-live="polite">
-            {selectedTexShelfFormula
-              ? selectedTexShelfFormula.subcategory
-              : `${filteredTexShelfFormulas.length} result${
-                  filteredTexShelfFormulas.length === 1 ? '' : 's'
-                }`}
+            {`${filteredTexShelfFormulas.length} result${
+              filteredTexShelfFormulas.length === 1 ? '' : 's'
+            }`}
           </p>
 
           <div className="texshelf-list" aria-live="polite">
@@ -1102,7 +922,7 @@ function App() {
         <div className="app-header">
           <div>
             <p className="eyebrow">LaTeXgO</p>
-            <h1 id="editor-title">TeX to SVG</h1>
+            <h1 id="editor-title">LaTeXgO</h1>
           </div>
         </div>
 
@@ -1302,15 +1122,6 @@ function App() {
             <div className="export-section-title">
               <h2>Download</h2>
             </div>
-            <label htmlFor="file-name">
-              File name
-              <input
-                id="file-name"
-                type="text"
-                value={fileName}
-                onChange={(event) => setFileName(event.target.value)}
-              />
-            </label>
             <label htmlFor="export-background">
               Background
               <select

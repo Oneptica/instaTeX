@@ -1,22 +1,12 @@
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
+import Ajv2020 from 'ajv/dist/2020.js'
 
 const root = process.cwd()
-const texshelfDir = path.join(root, 'TexShelf', 'formulas')
-const requiredFields = ['id', 'title', 'category', 'subcategory', 'latex', 'tags']
-const categories = new Set([
-  'Algebra',
-  'Calculus',
-  'Linear Algebra',
-  'Probability',
-  'Physics',
-  'Chemistry',
-  'Control Theory',
-  'Signal Processing',
-  'Image Processing',
-])
-const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const texshelfRoot = path.join(root, 'TexShelf')
+const texshelfDir = path.join(texshelfRoot, 'formulas')
+const schemaPath = path.join(texshelfRoot, 'schema.json')
 
 function titleFromSlug(slug) {
   return slug
@@ -24,85 +14,6 @@ function titleFromSlug(slug) {
     .filter(Boolean)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
-}
-
-function checkString(entry, field, errors, location) {
-  if (typeof entry[field] !== 'string' || entry[field].trim() === '') {
-    errors.push(`${location}: "${field}" must be a non-empty string.`)
-  }
-}
-
-function validateEntry(entry, errors, ids, location, expectedCategory, expectedSubcategory) {
-  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-    errors.push(`${location}: entry must be an object.`)
-    return
-  }
-
-  for (const field of requiredFields) {
-    if (!(field in entry)) errors.push(`${location}: missing required field "${field}".`)
-  }
-
-  checkString(entry, 'id', errors, location)
-  checkString(entry, 'title', errors, location)
-  checkString(entry, 'category', errors, location)
-  checkString(entry, 'subcategory', errors, location)
-  checkString(entry, 'latex', errors, location)
-
-  if (typeof entry.id === 'string' && !idPattern.test(entry.id)) {
-    errors.push(`${location}: id "${entry.id}" must use lowercase hyphen-case.`)
-  }
-
-  if (typeof entry.id === 'string') {
-    if (ids.has(entry.id)) {
-      errors.push(`${location}: duplicate id "${entry.id}".`)
-    }
-    ids.add(entry.id)
-  }
-
-  if (typeof entry.category === 'string' && !categories.has(entry.category)) {
-    errors.push(`${location}: unsupported category "${entry.category}".`)
-  }
-
-  if (typeof entry.category === 'string' && entry.category !== expectedCategory) {
-    errors.push(`${location}: category "${entry.category}" must match folder "${expectedCategory}".`)
-  }
-
-  if (typeof entry.subcategory === 'string' && entry.subcategory !== expectedSubcategory) {
-    errors.push(`${location}: subcategory "${entry.subcategory}" must match file "${expectedSubcategory}".`)
-  }
-
-  if ('description' in entry && typeof entry.description !== 'string') {
-    errors.push(`${location}: "description" must be a string when present.`)
-  }
-
-  if (!Array.isArray(entry.tags) || entry.tags.length === 0) {
-    errors.push(`${location}: "tags" must be a non-empty string array.`)
-  } else {
-    const tagSet = new Set()
-
-    for (const tag of entry.tags) {
-      if (typeof tag !== 'string' || tag.trim() === '') {
-        errors.push(`${location}: every tag must be a non-empty string.`)
-      }
-      if (tagSet.has(tag)) errors.push(`${location}: duplicate tag "${tag}".`)
-      tagSet.add(tag)
-    }
-  }
-
-  const allowedFields = new Set([
-    'id',
-    'title',
-    'category',
-    'subcategory',
-    'latex',
-    'description',
-    'tags',
-    'source',
-  ])
-
-  for (const field of Object.keys(entry)) {
-    if (!allowedFields.has(field)) errors.push(`${location}: unknown field "${field}".`)
-  }
 }
 
 async function getFormulaFiles(directory) {
@@ -122,10 +33,25 @@ async function getFormulaFiles(directory) {
   return files.sort()
 }
 
+function formatAjvErrors(relativePath, errors = []) {
+  return errors.map((error) => {
+    const location = error.instancePath || '/'
+    const detail = error.params?.missingProperty
+      ? `${error.message}: ${error.params.missingProperty}`
+      : error.message
+
+    return `${relativePath}${location}: ${detail}`
+  })
+}
+
 async function main() {
+  const schema = JSON.parse(await readFile(schemaPath, 'utf8'))
+  const ajv = new Ajv2020({ allErrors: true })
+  const validateFormulaFile = ajv.compile(schema)
   const files = await getFormulaFiles(texshelfDir)
   const errors = []
   const ids = new Set()
+  let formulaCount = 0
 
   for (const fullPath of files) {
     const relativePath = path.relative(texshelfDir, fullPath)
@@ -137,27 +63,43 @@ async function main() {
     }
 
     const [categorySlug, fileName] = pathParts
-    const subcategorySlug = path.basename(fileName, '.json')
     const expectedCategory = titleFromSlug(categorySlug)
-    const expectedSubcategory = titleFromSlug(subcategorySlug)
-    const content = await readFile(fullPath, 'utf8')
+    const expectedSubcategory = titleFromSlug(path.basename(fileName, '.json'))
     let entries
 
     try {
-      entries = JSON.parse(content)
+      entries = JSON.parse(await readFile(fullPath, 'utf8'))
     } catch (error) {
       errors.push(`${relativePath}: invalid JSON: ${error.message}`)
       continue
     }
 
-    if (!Array.isArray(entries)) {
-      errors.push(`${relativePath}: root value must be an array.`)
+    if (!validateFormulaFile(entries)) {
+      errors.push(...formatAjvErrors(relativePath, validateFormulaFile.errors))
       continue
     }
 
-    entries.forEach((entry, index) =>
-      validateEntry(entry, errors, ids, `${relativePath}[${index}]`, expectedCategory, expectedSubcategory),
-    )
+    entries.forEach((entry, index) => {
+      formulaCount += 1
+
+      if (entry.category !== expectedCategory) {
+        errors.push(
+          `${relativePath}[${index}]: category "${entry.category}" must match folder "${expectedCategory}".`,
+        )
+      }
+
+      if (entry.subcategory !== expectedSubcategory) {
+        errors.push(
+          `${relativePath}[${index}]: subcategory "${entry.subcategory}" must match file "${expectedSubcategory}".`,
+        )
+      }
+
+      if (ids.has(entry.id)) {
+        errors.push(`${relativePath}[${index}]: duplicate id "${entry.id}".`)
+      }
+
+      ids.add(entry.id)
+    })
   }
 
   if (errors.length > 0) {
@@ -167,7 +109,7 @@ async function main() {
     return
   }
 
-  console.log(`TeXShelf validation passed: ${ids.size} formulas in ${files.length} files.`)
+  console.log(`TeXShelf validation passed: ${formulaCount} formulas in ${files.length} files.`)
 }
 
 await main()

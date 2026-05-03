@@ -2,10 +2,9 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import MathJax from 'mathjax'
-import ts from 'typescript'
 
 const root = process.cwd()
-const sourcePath = path.join(root, 'src', 'lib', 'latexTemplates.ts')
+const toolbarGroupsPath = path.join(root, 'src', 'lib', 'toolbarGroups.json')
 const outputRoot = path.join(root, 'public', 'symbols')
 
 function slugifyAssetPart(value) {
@@ -19,58 +18,8 @@ function slugifyAssetPart(value) {
   )
 }
 
-function readLiteral(node) {
-  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
-    return node.text
-  }
-
-  if (ts.isNumericLiteral(node)) {
-    return Number(node.text)
-  }
-
-  if (node.kind === ts.SyntaxKind.TrueKeyword) return true
-  if (node.kind === ts.SyntaxKind.FalseKeyword) return false
-
-  if (ts.isArrayLiteralExpression(node)) {
-    return node.elements.map(readLiteral)
-  }
-
-  if (ts.isObjectLiteralExpression(node)) {
-    return Object.fromEntries(
-      node.properties
-        .filter(ts.isPropertyAssignment)
-        .map((property) => {
-          const name = property.name
-          const key =
-            ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)
-              ? name.text
-              : name.getText()
-
-          return [key, readLiteral(property.initializer)]
-        }),
-    )
-  }
-
-  throw new Error(`Unsupported template literal node: ${node.getText()}`)
-}
-
 async function loadToolbarGroups() {
-  const sourceText = await fs.readFile(sourcePath, 'utf8')
-  const sourceFile = ts.createSourceFile(sourcePath, sourceText, ts.ScriptTarget.Latest, true)
-
-  for (const statement of sourceFile.statements) {
-    if (!ts.isVariableStatement(statement)) continue
-
-    for (const declaration of statement.declarationList.declarations) {
-      if (ts.isIdentifier(declaration.name) && declaration.name.text === 'toolbarGroups') {
-        if (!declaration.initializer) throw new Error('toolbarGroups has no initializer.')
-
-        return readLiteral(declaration.initializer)
-      }
-    }
-  }
-
-  throw new Error('toolbarGroups was not found.')
+  return JSON.parse(await fs.readFile(toolbarGroupsPath, 'utf8'))
 }
 
 function getTemplatePreviewLatex(template) {
