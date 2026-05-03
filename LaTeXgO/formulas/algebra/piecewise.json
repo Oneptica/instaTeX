@@ -1,0 +1,28 @@
+[
+  {
+    "id": "cases-function",
+    "title": "Cases function",
+    "category": "Algebra",
+    "subcategory": "Piecewise",
+    "latex": "f(x)=\\begin{cases}\nx^2, & x \\geq 0 \\\\\n-x, & x < 0\n\\end{cases}",
+    "description": "Reusable cases environment example.",
+    "tags": [
+      "algebra",
+      "piecewise",
+      "cases"
+    ]
+  },
+  {
+    "id": "piecewise-absolute-value",
+    "title": "Piecewise absolute value",
+    "category": "Algebra",
+    "subcategory": "Piecewise",
+    "latex": "|x| = \\left\\{ \\begin{array}{cl}\nx & : \\ x \\geq 0 \\\\\n-x & : \\ x < 0\n\\end{array} \\right.",
+    "description": "Absolute value as a piecewise function.",
+    "tags": [
+      "algebra",
+      "piecewise",
+      "absolute-value"
+    ]
+  }
+]

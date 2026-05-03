@@ -1,0 +1,15 @@
+[
+  {
+    "id": "nyquist-rate",
+    "title": "Nyquist Rate",
+    "category": "Signal Processing",
+    "subcategory": "Sampling",
+    "latex": "f_s\\geq 2f_{\\max}",
+    "description": "Sampling rate required to avoid aliasing for a band-limited signal.",
+    "tags": [
+      "signal-processing",
+      "sampling",
+      "nyquist"
+    ]
+  }
+]

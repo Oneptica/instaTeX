@@ -1,0 +1,28 @@
+[
+  {
+    "id": "continuous-state-space-model",
+    "title": "Continuous State-Space Model",
+    "category": "Control Theory",
+    "subcategory": "State Space",
+    "latex": "\\dot{\\mathbf{x}}(t)=\\mathbf{A}\\mathbf{x}(t)+\\mathbf{B}\\mathbf{u}(t),\\qquad \\mathbf{y}(t)=\\mathbf{C}\\mathbf{x}(t)+\\mathbf{D}\\mathbf{u}(t)",
+    "description": "Standard continuous-time linear state-space model.",
+    "tags": [
+      "control",
+      "state-space",
+      "linear-system"
+    ]
+  },
+  {
+    "id": "state-transition-solution",
+    "title": "State Transition Solution",
+    "category": "Control Theory",
+    "subcategory": "State Space",
+    "latex": "\\mathbf{x}(t)=e^{\\mathbf{A}t}\\mathbf{x}(0)+\\int_0^t e^{\\mathbf{A}(t-\\tau)}\\mathbf{B}\\mathbf{u}(\\tau)\\,d\\tau",
+    "description": "Solution of a continuous-time linear state equation.",
+    "tags": [
+      "control",
+      "state-space",
+      "transition-matrix"
+    ]
+  }
+]

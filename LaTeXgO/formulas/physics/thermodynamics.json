@@ -1,0 +1,15 @@
+[
+  {
+    "id": "ideal-gas-law",
+    "title": "Ideal gas law",
+    "category": "Physics",
+    "subcategory": "Thermodynamics",
+    "latex": "PV=nRT",
+    "description": "Ideal gas equation of state.",
+    "tags": [
+      "physics",
+      "thermodynamics",
+      "gas"
+    ]
+  }
+]

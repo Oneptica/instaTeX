@@ -1,0 +1,28 @@
+[
+  {
+    "id": "morphological-dilation",
+    "title": "Morphological Dilation",
+    "category": "Image Processing",
+    "subcategory": "Morphology",
+    "latex": "A\\oplus B=\\{z\\mid (\\hat{B})_z\\cap A\\neq\\varnothing\\}",
+    "description": "Set definition of binary dilation.",
+    "tags": [
+      "image-processing",
+      "morphology",
+      "dilation"
+    ]
+  },
+  {
+    "id": "morphological-erosion",
+    "title": "Morphological Erosion",
+    "category": "Image Processing",
+    "subcategory": "Morphology",
+    "latex": "A\\ominus B=\\{z\\mid B_z\\subseteq A\\}",
+    "description": "Set definition of binary erosion.",
+    "tags": [
+      "image-processing",
+      "morphology",
+      "erosion"
+    ]
+  }
+]

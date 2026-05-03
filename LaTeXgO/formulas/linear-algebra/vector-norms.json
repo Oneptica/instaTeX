@@ -1,0 +1,15 @@
+[
+  {
+    "id": "euclidean-norm",
+    "title": "Euclidean norm",
+    "category": "Linear Algebra",
+    "subcategory": "Vector Norms",
+    "latex": "\\left\\|\\mathbf{x}\\right\\|_2=\\sqrt{x_1^2+x_2^2+\\cdots+x_n^2}",
+    "description": "Euclidean norm of an n-dimensional vector.",
+    "tags": [
+      "linear-algebra",
+      "vector",
+      "norm"
+    ]
+  }
+]

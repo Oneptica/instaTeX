@@ -1,0 +1,28 @@
+[
+  {
+    "id": "carbon-dioxide-reduction",
+    "title": "Carbon dioxide reduction",
+    "category": "Chemistry",
+    "subcategory": "Reactions",
+    "latex": "\\ce{CO2 + C -> 2 CO}",
+    "description": "Carbon dioxide reacts with carbon to form carbon monoxide.",
+    "tags": [
+      "chemistry",
+      "reaction",
+      "mhchem"
+    ]
+  },
+  {
+    "id": "methane-combustion",
+    "title": "Methane combustion",
+    "category": "Chemistry",
+    "subcategory": "Reactions",
+    "latex": "\\ce{CH4 + 2O2 -> CO2 + 2H2O}",
+    "description": "Complete combustion of methane.",
+    "tags": [
+      "chemistry",
+      "combustion",
+      "mhchem"
+    ]
+  }
+]

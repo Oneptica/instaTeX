@@ -35,6 +35,7 @@
 
 # LaTeXgO formula library.
 !LaTeXgO/
+!LaTeXgO/**
 
 # Optional repository automation.
 !.github/

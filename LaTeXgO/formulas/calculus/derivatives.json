@@ -1,0 +1,15 @@
+[
+  {
+    "id": "ordinary-and-partial-derivatives",
+    "title": "Ordinary and partial derivatives",
+    "category": "Calculus",
+    "subcategory": "Derivatives",
+    "latex": "\\dv{x}{t} = v,\\qquad \\pdv{u}{t} = \\alpha \\pdv[2]{u}{x}",
+    "description": "Physics-style derivative notation.",
+    "tags": [
+      "calculus",
+      "derivative",
+      "partial"
+    ]
+  }
+]

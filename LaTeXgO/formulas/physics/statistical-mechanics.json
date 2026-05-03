@@ -1,0 +1,15 @@
+[
+  {
+    "id": "boltzmann-entropy",
+    "title": "Boltzmann entropy",
+    "category": "Physics",
+    "subcategory": "Statistical Mechanics",
+    "latex": "S=k_B\\ln\\Omega",
+    "description": "Boltzmann formula for entropy.",
+    "tags": [
+      "physics",
+      "entropy",
+      "statistical-mechanics"
+    ]
+  }
+]

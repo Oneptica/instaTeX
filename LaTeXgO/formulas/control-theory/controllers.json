@@ -1,0 +1,28 @@
+[
+  {
+    "id": "pid-controller",
+    "title": "PID Controller",
+    "category": "Control Theory",
+    "subcategory": "Controllers",
+    "latex": "u(t)=K_p e(t)+K_i\\int_0^t e(\\tau)\\,d\\tau+K_d\\frac{de(t)}{dt}",
+    "description": "Time-domain proportional-integral-derivative control law.",
+    "tags": [
+      "control",
+      "controller",
+      "pid"
+    ]
+  },
+  {
+    "id": "linear-quadratic-regulator",
+    "title": "Linear Quadratic Regulator",
+    "category": "Control Theory",
+    "subcategory": "Controllers",
+    "latex": "J=\\int_0^\\infty \\left(\\mathbf{x}^T\\mathbf{Q}\\mathbf{x}+\\mathbf{u}^T\\mathbf{R}\\mathbf{u}\\right)\\,dt",
+    "description": "Infinite-horizon LQR cost functional.",
+    "tags": [
+      "control",
+      "optimal-control",
+      "lqr"
+    ]
+  }
+]

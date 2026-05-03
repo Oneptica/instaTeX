@@ -1,0 +1,15 @@
+[
+  {
+    "id": "bayes-theorem",
+    "title": "Bayes theorem",
+    "category": "Probability",
+    "subcategory": "Conditional Probability",
+    "latex": "P(A\\mid B)=\\frac{P(B\\mid A)P(A)}{P(B)}",
+    "description": "Bayes theorem for conditional probability.",
+    "tags": [
+      "probability",
+      "bayes",
+      "conditional"
+    ]
+  }
+]

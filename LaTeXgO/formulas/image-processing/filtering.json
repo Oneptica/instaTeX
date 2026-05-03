@@ -1,0 +1,28 @@
+[
+  {
+    "id": "two-dimensional-convolution",
+    "title": "Two-Dimensional Convolution",
+    "category": "Image Processing",
+    "subcategory": "Filtering",
+    "latex": "(I*K)(x,y)=\\sum_m\\sum_n I(x-m,y-n)K(m,n)",
+    "description": "Discrete 2D convolution for image filtering.",
+    "tags": [
+      "image-processing",
+      "filtering",
+      "convolution"
+    ]
+  },
+  {
+    "id": "gaussian-kernel",
+    "title": "Gaussian Kernel",
+    "category": "Image Processing",
+    "subcategory": "Filtering",
+    "latex": "G(x,y)=\\frac{1}{2\\pi\\sigma^2}e^{-\\frac{x^2+y^2}{2\\sigma^2}}",
+    "description": "Continuous 2D Gaussian smoothing kernel.",
+    "tags": [
+      "image-processing",
+      "gaussian",
+      "smoothing"
+    ]
+  }
+]

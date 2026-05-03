@@ -1,0 +1,15 @@
+[
+  {
+    "id": "binomial-theorem",
+    "title": "Binomial theorem",
+    "category": "Algebra",
+    "subcategory": "Expansion",
+    "latex": "(x+y)^n=\\sum_{k=0}^{n}\\binom{n}{k}x^{n-k}y^k",
+    "description": "Finite expansion of a binomial power.",
+    "tags": [
+      "algebra",
+      "sum",
+      "binomial"
+    ]
+  }
+]

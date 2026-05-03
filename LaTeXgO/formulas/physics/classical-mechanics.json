@@ -1,0 +1,28 @@
+[
+  {
+    "id": "euler-lagrange-equation",
+    "title": "Euler-Lagrange equation",
+    "category": "Physics",
+    "subcategory": "Classical Mechanics",
+    "latex": "\\pdv{L}{q}-\\dv{}{t}\\pdv{L}{\\dot{q}}=0",
+    "description": "Euler-Lagrange equation for one generalized coordinate.",
+    "tags": [
+      "physics",
+      "mechanics",
+      "lagrangian"
+    ]
+  },
+  {
+    "id": "hamiltonian-definition",
+    "title": "Hamiltonian definition",
+    "category": "Physics",
+    "subcategory": "Classical Mechanics",
+    "latex": "H(q,p,t)=\\sum_i p_i\\dot{q}_i-L(q,\\dot{q},t)",
+    "description": "Hamiltonian as a Legendre transform of the Lagrangian.",
+    "tags": [
+      "physics",
+      "mechanics",
+      "hamiltonian"
+    ]
+  }
+]

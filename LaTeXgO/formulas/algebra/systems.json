@@ -1,0 +1,15 @@
+[
+  {
+    "id": "linear-system",
+    "title": "Linear system",
+    "category": "Algebra",
+    "subcategory": "Systems",
+    "latex": "\\left\\{\n\\begin{array}{rcl}\n2x+y&=&5 \\\\\nx-y&=&1\n\\end{array}\n\\right.",
+    "description": "Two-equation linear system.",
+    "tags": [
+      "algebra",
+      "system",
+      "linear"
+    ]
+  }
+]

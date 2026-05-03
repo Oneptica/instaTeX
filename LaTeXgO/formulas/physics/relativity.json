@@ -1,0 +1,15 @@
+[
+  {
+    "id": "einstein-relation",
+    "title": "Einstein relation",
+    "category": "Physics",
+    "subcategory": "Relativity",
+    "latex": "E=mc^2",
+    "description": "Mass-energy equivalence.",
+    "tags": [
+      "physics",
+      "relativity",
+      "energy"
+    ]
+  }
+]
