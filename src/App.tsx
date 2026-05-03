@@ -4,6 +4,7 @@ import { defaultKeymap, history, historyKeymap, redo, redoDepth, undo, undoDepth
 import { StreamLanguage, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import { EditorState } from '@codemirror/state'
 import { EditorView, drawSelection, keymap, placeholder } from '@codemirror/view'
+import Fuse from 'fuse.js'
 import { stexMath } from '@codemirror/legacy-modes/mode/stex'
 import {
   type MathJaxFont,
@@ -35,6 +36,10 @@ type AutocompleteItem = {
   value: string
   description: string
   tabStops?: number[]
+}
+
+type TexShelfSearchItem = TexShelfFormula & {
+  tagsText: string
 }
 
 const autocompleteItems: AutocompleteItem[] = [
@@ -350,6 +355,7 @@ function getNavigationStops(input: string) {
 
 function App() {
   const initialHistory = useMemo(() => readStoredStringArray(historyStorageKey, [starterLatex]), [])
+  const [pathname, setPathname] = useState(() => window.location.pathname)
   const [latex, setLatex] = useState(initialHistory[initialHistory.length - 1] ?? starterLatex)
   const [display, setDisplay] = useState(true)
   const [font, setFont] = useState<MathJaxFont>('mathjax-newcm')
@@ -378,6 +384,32 @@ function App() {
   const historyIndexRef = useRef(initialHistory.length - 1)
   const pngScale = 2
   const exportDpi = 192
+  const texShelfSearchItems = useMemo<TexShelfSearchItem[]>(
+    () =>
+      texShelfFormulas.map((formula) => ({
+        ...formula,
+        tagsText: formula.tags.join(' '),
+      })),
+    [],
+  )
+  const texShelfFuse = useMemo(
+    () =>
+      new Fuse(texShelfSearchItems, {
+        includeScore: true,
+        ignoreLocation: true,
+        threshold: 0.32,
+        minMatchCharLength: 2,
+        keys: [
+          { name: 'title', weight: 5 },
+          { name: 'subcategory', weight: 4 },
+          { name: 'tagsText', weight: 3 },
+          { name: 'description', weight: 2 },
+          { name: 'category', weight: 1.5 },
+          { name: 'latex', weight: 1 },
+        ],
+      }),
+    [texShelfSearchItems],
+  )
 
   useEffect(() => {
     matrixTypeRef.current = matrixType
@@ -404,31 +436,36 @@ function App() {
     () => ['All', ...Array.from(new Set(texShelfFormulas.map((formula) => formula.category))).sort()],
     [],
   )
+  const isTexShelfPage = pathname.replace(/\/+$/, '') === '/texshelf'
   const filteredTexShelfFormulas = useMemo(() => {
     const query = texShelfSearch.trim().toLowerCase()
+    const categoryFiltered = texShelfCategory
+      ? texShelfFormulas.filter((formula) => texShelfCategory === 'All' || formula.category === texShelfCategory)
+      : texShelfFormulas
 
-    return texShelfFormulas.filter((formula) => {
-      const matchesCategory =
-        texShelfCategory === 'All' || formula.category === texShelfCategory
+    if (!query) return categoryFiltered
 
-      if (!matchesCategory) return false
-      if (!query) return true
+    const categoryFilteredIds = new Set(categoryFiltered.map((formula) => formula.id))
 
-      const haystack = [
-        formula.title,
-        formula.category,
-        formula.subcategory,
-        formula.description,
-        formula.latex,
-        ...formula.tags,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
+    return texShelfFuse.search(query).map((result) => result.item).filter((formula) => categoryFilteredIds.has(formula.id))
+  }, [texShelfCategory, texShelfFuse, texShelfSearch])
 
-      return haystack.includes(query)
-    })
-  }, [texShelfCategory, texShelfSearch])
+  useEffect(() => {
+    const handlePopState = () => setPathname(window.location.pathname)
+
+    window.addEventListener('popstate', handlePopState)
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [])
+
+  function navigate(path: string) {
+    if (window.location.pathname === path) return
+
+    window.history.pushState({}, '', path)
+    setPathname(path)
+  }
 
   function syncHistoryState() {
     setHistorySnapshot([...historyRef.current])
@@ -556,6 +593,8 @@ function App() {
       description: formula.description,
       prefix: formula.latex,
     })
+
+    navigate('/')
   }
 
   function closeMenuFromClick(event: MouseEvent<HTMLElement>) {
@@ -858,6 +897,67 @@ function App() {
     renderFormula(nextOptions)
   }
 
+  if (isTexShelfPage) {
+    return (
+      <main className="texshelf-page">
+        <header className="texshelf-hero" aria-label="TeXShelf">
+          <div className="texshelf-hero-top">
+            <div>
+              <p className="eyebrow">LaTeXgO</p>
+              <h1>TeXShelf</h1>
+            </div>
+            <button type="button" className="secondary-button texshelf-nav-button" onClick={() => navigate('/')}>
+              Open editor
+            </button>
+          </div>
+
+          <div className="texshelf-hero-center">
+            <label className="texshelf-search-shell" htmlFor="texshelf-page-search">
+              <span>Search</span>
+              <input
+                id="texshelf-page-search"
+                type="search"
+                value={texShelfSearch}
+                onChange={(event) => setTexShelfSearch(event.target.value)}
+                placeholder="maxwell, bayes, pid..."
+              />
+            </label>
+
+            <div className="texshelf-category-strip" aria-label="TeXShelf categories">
+              {texShelfCategories.map((category) => (
+                <button
+                  className={category === texShelfCategory ? 'active' : ''}
+                  key={category}
+                  type="button"
+                  aria-pressed={category === texShelfCategory}
+                  onClick={() => setTexShelfCategory(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            <p className="texshelf-count texshelf-count-center" aria-live="polite">
+              {`${filteredTexShelfFormulas.length} result${
+                filteredTexShelfFormulas.length === 1 ? '' : 's'
+              }`}
+            </p>
+          </div>
+        </header>
+
+        <section className="texshelf-page-results" aria-live="polite">
+          {filteredTexShelfFormulas.length > 0 ? (
+            filteredTexShelfFormulas.map((formula) => (
+              <TexShelfFormulaCard formula={formula} key={formula.id} onUse={insertTexShelfFormula} />
+            ))
+          ) : (
+            <p className="texshelf-empty texshelf-empty-page">No matching formulas</p>
+          )}
+        </section>
+      </main>
+    )
+  }
+
   return (
     <main className="app-shell">
       <aside className="texshelf-sidebar" aria-label="TeXShelf formula library">
@@ -924,6 +1024,59 @@ function App() {
             <p className="eyebrow">LaTeXgO</p>
             <h1 id="editor-title">LaTeXgO</h1>
           </div>
+          <button type="button" className="secondary-button" onClick={() => navigate('/texshelf')}>
+            TeXShelf
+          </button>
+        </div>
+
+        <div className="symbol-strip" aria-label="Symbol templates">
+          {toolbarGroups.map((group) => (
+            <section className="github-symbol-group" key={group.name} aria-label={group.name}>
+              <p>{group.name}</p>
+              <div className="github-symbol-preview">
+                {group.templates.slice(0, visibleToolbarTemplateCount).map((template, index) => (
+                  <button
+                    key={`${group.name}-preview-${template.label}-${template.prefix}`}
+                    type="button"
+                    title={`${template.description ?? template.label}: ${template.prefix}${
+                      template.suffix ?? ''
+                    }`}
+                    aria-label={template.description ?? template.label}
+                    onClick={() => insertTemplate(template)}
+                  >
+                    <TemplateButtonLabel
+                      template={template}
+                      assetPath={getTemplateAssetPath(group.name, template, index)}
+                    />
+                  </button>
+                ))}
+              </div>
+              {group.templates.length > visibleToolbarTemplateCount ? (
+                <div className="github-symbol-popover">
+                  {group.templates.slice(visibleToolbarTemplateCount).map((template, index) => {
+                    const templateIndex = index + visibleToolbarTemplateCount
+
+                    return (
+                      <button
+                        key={`${group.name}-${template.label}-${template.prefix}-${template.suffix ?? ''}`}
+                        type="button"
+                        title={`${template.description ?? template.label}: ${template.prefix}${
+                          template.suffix ?? ''
+                        }`}
+                        aria-label={template.description ?? template.label}
+                        onClick={() => insertTemplate(template)}
+                      >
+                        <TemplateButtonLabel
+                          template={template}
+                          assetPath={getTemplateAssetPath(group.name, template, templateIndex)}
+                        />
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : null}
+            </section>
+          ))}
         </div>
 
         <label className="input-label" htmlFor="latex-input">
@@ -1040,56 +1193,6 @@ function App() {
               </div>
             </details>
           </div>
-        </div>
-
-        <div className="symbol-strip" aria-label="Symbol templates">
-          {toolbarGroups.map((group) => (
-            <section className="github-symbol-group" key={group.name} aria-label={group.name}>
-              <p>{group.name}</p>
-              <div className="github-symbol-preview">
-                {group.templates.slice(0, visibleToolbarTemplateCount).map((template, index) => (
-                  <button
-                    key={`${group.name}-preview-${template.label}-${template.prefix}`}
-                    type="button"
-                    title={`${template.description ?? template.label}: ${template.prefix}${
-                      template.suffix ?? ''
-                    }`}
-                    aria-label={template.description ?? template.label}
-                    onClick={() => insertTemplate(template)}
-                  >
-                    <TemplateButtonLabel
-                      template={template}
-                      assetPath={getTemplateAssetPath(group.name, template, index)}
-                    />
-                  </button>
-                ))}
-              </div>
-              {group.templates.length > visibleToolbarTemplateCount ? (
-                <div className="github-symbol-popover">
-                  {group.templates.slice(visibleToolbarTemplateCount).map((template, index) => {
-                    const templateIndex = index + visibleToolbarTemplateCount
-
-                    return (
-                    <button
-                      key={`${group.name}-${template.label}-${template.prefix}-${template.suffix ?? ''}`}
-                      type="button"
-                      title={`${template.description ?? template.label}: ${template.prefix}${
-                        template.suffix ?? ''
-                      }`}
-                      aria-label={template.description ?? template.label}
-                      onClick={() => insertTemplate(template)}
-                    >
-                      <TemplateButtonLabel
-                        template={template}
-                        assetPath={getTemplateAssetPath(group.name, template, templateIndex)}
-                      />
-                    </button>
-                    )
-                  })}
-                </div>
-              ) : null}
-            </section>
-          ))}
         </div>
 
         <div className="editor-frame" id="latex-input" ref={editorFrameRef} />
