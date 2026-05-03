@@ -26,7 +26,6 @@ const starterLatex = ''
 const visibleToolbarTemplateCount = 4
 
 const historyStorageKey = 'latexgo.history'
-const favoritesStorageKey = 'latexgo.favorites'
 
 type ExportBackground = 'transparent' | 'white' | 'black' | 'custom'
 type AppPage = 'editor' | 'texshelf'
@@ -384,7 +383,6 @@ function App() {
   const [canRedo, setCanRedo] = useState(false)
   const [historySnapshot, setHistorySnapshot] = useState(initialHistory)
   const [historyIndex, setHistoryIndex] = useState(initialHistory.length - 1)
-  const [favorites, setFavorites] = useState(() => readStoredStringArray(favoritesStorageKey, []))
   const [texShelfSearch, setTexShelfSearch] = useState('')
   const [texShelfCategory, setTexShelfCategory] = useState('All')
   const [exportBackground, setExportBackground] = useState<ExportBackground>('transparent')
@@ -456,15 +454,6 @@ function App() {
       return haystack.includes(query)
     })
   }, [selectedTexShelfFormula, texShelfCategory, texShelfSearch])
-  const favoriteItems = useMemo(
-    () =>
-      favorites.map((item, index) => ({
-        label: `${index + 1}. ${item.split('\n').find((line) => line.trim())?.trim() || 'Empty'}`,
-        value: index,
-      })),
-    [favorites],
-  )
-  const isFavorite = favorites.includes(latex)
 
   function navigateTo(page: AppPage, formulaId = '') {
     const path = page === 'texshelf' ? `/texshelf${formulaId ? `/${formulaId}` : ''}` : '/'
@@ -582,41 +571,6 @@ function App() {
     historyRef.current = [latex]
     historyIndexRef.current = 0
     syncHistoryState()
-  }
-
-  function saveFavorite() {
-    const trimmedLatex = latex.trim()
-
-    if (!trimmedLatex || favorites.includes(latex)) return
-
-    setFavorites((currentFavorites) => {
-      const nextFavorites = [latex, ...currentFavorites].slice(0, 40)
-
-      writeStoredStringArray(favoritesStorageKey, nextFavorites)
-      return nextFavorites
-    })
-  }
-
-  function removeCurrentFavorite() {
-    setFavorites((currentFavorites) => {
-      const nextFavorites = currentFavorites.filter((favorite) => favorite !== latex)
-
-      writeStoredStringArray(favoritesStorageKey, nextFavorites)
-      return nextFavorites
-    })
-  }
-
-  function restoreFavorite(index: number) {
-    const favorite = favorites[index]
-
-    if (!favorite) return
-
-    updateLatex(favorite)
-  }
-
-  function clearFavorites() {
-    setFavorites([])
-    writeStoredStringArray(favoritesStorageKey, [])
   }
 
   function insertTemplate(template: LatexTemplate) {
@@ -1355,40 +1309,6 @@ function App() {
               </option>
             ))}
           </select>
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={isFavorite ? removeCurrentFavorite : saveFavorite}
-          >
-            {isFavorite ? 'Remove Favorite' : 'Save Favorite'}
-          </button>
-          <select
-            className="history-select"
-            aria-label="Favorite formulas"
-            defaultValue=""
-            onChange={(event) => {
-              restoreFavorite(Number(event.target.value))
-              event.target.value = ''
-            }}
-            disabled={favorites.length === 0}
-          >
-            <option value="" disabled>
-              Favorites
-            </option>
-            {favoriteItems.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={clearFavorites}
-            disabled={favorites.length === 0}
-          >
-            Clear Favorites
-          </button>
           <button type="button" className="secondary-button" onClick={clearHistory}>
             Clear History
           </button>

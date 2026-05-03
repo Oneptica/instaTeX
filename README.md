@@ -17,21 +17,23 @@ TeXShelf is the formula library used by LaTeXgO.
 Formula data lives in:
 
 ```txt
-texshelf/
-  algebra.json
-  calculus.json
-  physics.json
-  chemistry.json
+TexShelf/
+  formulas/
+    algebra.json
+    calculus.json
+    physics.json
+    chemistry.json
   schema.json
 ```
 
 LaTeXgO reads those JSON files and turns entries into insertable examples in the editor.
 
-See [texshelf/README.md](texshelf/README.md) for the formula format and contribution rules.
+See [TexShelf/README.md](TexShelf/README.md) for the formula format and contribution rules.
 
 ## Development
 
 ```bash
+git submodule update --init --recursive
 npm install
 npm run dev
 ```

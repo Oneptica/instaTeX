@@ -2,12 +2,12 @@
 
 Thanks for considering a contribution.
 
-The best first contribution is usually a TeXShelf formula entry. TeXShelf lives in `texshelf/` and is the open formula library used by LaTeXgO.
+The best first contribution is usually a TeXShelf formula entry. TeXShelf lives in `TexShelf/` and is the open formula library used by LaTeXgO.
 
 ## Formula Contributions
 
-1. Choose the closest JSON file in `texshelf/`.
-2. Add one formula entry following `texshelf/schema.json`.
+1. Choose the closest JSON file in `TexShelf/formulas/`.
+2. Add one formula entry following `TexShelf/schema.json`.
 3. Keep `id` unique, stable, lowercase, and hyphenated.
 4. Use TeX source only.
 5. Add useful tags.
@@ -37,6 +37,6 @@ The validator checks JSON shape, required fields, duplicate IDs, supported categ
 
 ## License
 
-TeXShelf formula data is licensed as CC BY 4.0. See `texshelf/LICENSE.md`.
+TeXShelf formula data is licensed in the TeXShelf repository. See `TexShelf/README.md` for the current terms.
 
 LaTeXgO application code licensing is controlled separately by the project owner.

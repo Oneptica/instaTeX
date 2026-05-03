@@ -3,7 +3,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 const root = process.cwd()
-const texshelfDir = path.join(root, 'texshelf')
+const texshelfDir = path.join(root, 'TexShelf', 'formulas')
 const requiredFields = ['id', 'title', 'category', 'latex', 'tags']
 const categories = new Set([
   'Algebra',

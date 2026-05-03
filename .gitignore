@@ -3,6 +3,7 @@
 
 # Project metadata and docs.
 !.gitignore
+!.gitmodules
 !README.md
 !CONTRIBUTING.md
 !LICENSE*
@@ -33,8 +34,7 @@
 !public/symbols/**
 
 # TeXShelf formula library.
-!texshelf/
-!texshelf/**
+!TexShelf/
 
 # Optional repository automation.
 !.github/

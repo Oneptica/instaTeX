@@ -1,7 +1,7 @@
-import algebraFormulas from '../../texshelf/algebra.json'
-import calculusFormulas from '../../texshelf/calculus.json'
-import chemistryFormulas from '../../texshelf/chemistry.json'
-import physicsFormulas from '../../texshelf/physics.json'
+import algebraFormulas from '../../TexShelf/formulas/algebra.json'
+import calculusFormulas from '../../TexShelf/formulas/calculus.json'
+import chemistryFormulas from '../../TexShelf/formulas/chemistry.json'
+import physicsFormulas from '../../TexShelf/formulas/physics.json'
 
 export type LatexTemplate = {
   label: string
