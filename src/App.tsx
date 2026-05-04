@@ -169,6 +169,10 @@ function TemplateButtonLabel({
   )
 }
 
+function BrandLogo() {
+  return <img className="page-brand-logo page-brand-logo-editor" src="/instatex.svg" alt="InstaTex" />
+}
+
 const latexgoPreviewOptions: RenderOptions = {
   allowHtml: false,
   display: true,
@@ -239,7 +243,7 @@ function LaTeXgOFormulaCard({
             {copied ? 'Copied' : 'Copy code'}
           </button>
           <button type="button" onClick={() => onUse(formula)}>
-            Use in InstaTex
+            instaTeX
           </button>
         </div>
       </div>
@@ -355,7 +359,6 @@ function getNavigationStops(input: string) {
 
 function App() {
   const initialHistory = useMemo(() => readStoredStringArray(historyStorageKey, [starterLatex]), [])
-  const [pathname, setPathname] = useState(() => window.location.pathname)
   const [latex, setLatex] = useState(initialHistory[initialHistory.length - 1] ?? starterLatex)
   const [display, setDisplay] = useState(true)
   const [font, setFont] = useState<MathJaxFont>('mathjax-newcm')
@@ -436,7 +439,6 @@ function App() {
     () => ['All', ...Array.from(new Set(latexgoFormulas.map((formula) => formula.category))).sort()],
     [],
   )
-  const isLaTeXgOPage = pathname.replace(/\/+$/, '') === '/latexgo'
   const filteredLaTeXgOFormulas = useMemo(() => {
     const query = latexgoSearch.trim().toLowerCase()
     const categoryFiltered = latexgoCategory
@@ -449,23 +451,6 @@ function App() {
 
     return latexgoFuse.search(query).map((result) => result.item).filter((formula) => categoryFilteredIds.has(formula.id))
   }, [latexgoCategory, latexgoFuse, latexgoSearch])
-
-  useEffect(() => {
-    const handlePopState = () => setPathname(window.location.pathname)
-
-    window.addEventListener('popstate', handlePopState)
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-    }
-  }, [])
-
-  function navigate(path: string) {
-    if (window.location.pathname === path) return
-
-    window.history.pushState({}, '', path)
-    setPathname(path)
-  }
 
   function syncHistoryState() {
     setHistorySnapshot([...historyRef.current])
@@ -488,7 +473,7 @@ function App() {
     historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1)
     historyRef.current.push(nextLatex)
 
-    if (historyRef.current.length > 60) {
+    if (historyRef.current.length > 100) {
       historyRef.current.shift()
     }
 
@@ -593,8 +578,6 @@ function App() {
       description: formula.description,
       prefix: formula.latex,
     })
-
-    navigate('/')
   }
 
   function closeMenuFromClick(event: MouseEvent<HTMLElement>) {
@@ -897,33 +880,35 @@ function App() {
     renderFormula(nextOptions)
   }
 
-  if (isLaTeXgOPage) {
-    return (
-      <main className="latexgo-page">
-        <header className="latexgo-hero" aria-label="LaTeXgO">
-          <div className="latexgo-hero-top">
-            <div>
-              <p className="eyebrow">InstaTex</p>
-              <h1>LaTeXgO</h1>
+  return (
+    <main className="app-shell">
+      <div className="page-brand-row">
+        <BrandLogo />
+        <p className="editor-brand-tagline">
+          A free, open-source TeX editor for exporting formulas.
+        </p>
+      </div>
+      <div className="app-shell-content">
+        <aside className="latexgo-sidebar" aria-label="LaTeXgO formula library">
+          <section className="latexgo-panel latexgo-sidebar-panel" aria-label="LaTeXgO formulas">
+            <div className="latexgo-heading">
+              <h2>LaTeXgO</h2>
             </div>
-            <button type="button" className="secondary-button latexgo-nav-button" onClick={() => navigate('/')}>
-              Open editor
-            </button>
-          </div>
 
-          <div className="latexgo-hero-center">
-            <label className="latexgo-search-shell" htmlFor="latexgo-page-search">
-              <span>Search</span>
-              <input
-                id="latexgo-page-search"
-                type="search"
-                value={latexgoSearch}
-                onChange={(event) => setLaTeXgOSearch(event.target.value)}
-                placeholder="maxwell, bayes, pid..."
-              />
-            </label>
+            <div className="latexgo-controls">
+              <label htmlFor="latexgo-sidebar-search">
+                <input
+                  id="latexgo-sidebar-search"
+                  type="search"
+                  value={latexgoSearch}
+                  onChange={(event) => setLaTeXgOSearch(event.target.value)}
+                  placeholder="Search: maxwell, bayes, pid..."
+                  aria-label="Search"
+                />
+              </label>
+            </div>
 
-            <div className="latexgo-category-strip" aria-label="LaTeXgO categories">
+            <div className="latexgo-categories" aria-label="LaTeXgO categories">
               {latexgoCategories.map((category) => (
                 <button
                   className={category === latexgoCategory ? 'active' : ''}
@@ -937,98 +922,23 @@ function App() {
               ))}
             </div>
 
-            <p className="latexgo-count latexgo-count-center" aria-live="polite">
-              {`${filteredLaTeXgOFormulas.length} result${
-                filteredLaTeXgOFormulas.length === 1 ? '' : 's'
-              }`}
-            </p>
-          </div>
-        </header>
-
-        <section className="latexgo-page-results" aria-live="polite">
-          {filteredLaTeXgOFormulas.length > 0 ? (
-            filteredLaTeXgOFormulas.map((formula) => (
-              <LaTeXgOFormulaCard formula={formula} key={formula.id} onUse={insertLaTeXgOFormula} />
-            ))
-          ) : (
-            <p className="latexgo-empty latexgo-empty-page">No matching formulas</p>
-          )}
-        </section>
-      </main>
-    )
-  }
-
-  return (
-    <main className="app-shell">
-      <aside className="latexgo-sidebar" aria-label="LaTeXgO formula library">
-        <section className="latexgo-panel latexgo-sidebar-panel" aria-label="LaTeXgO formulas">
-          <div className="latexgo-heading">
-            <div>
-              <p className="eyebrow">LaTeXgO</p>
-              <h2>{filteredLaTeXgOFormulas.length} formulas</h2>
+            <div className="latexgo-list" aria-live="polite">
+              {filteredLaTeXgOFormulas.length > 0 ? (
+                filteredLaTeXgOFormulas.map((formula) => (
+                  <LaTeXgOFormulaCard
+                    formula={formula}
+                    key={formula.id}
+                    onUse={insertLaTeXgOFormula}
+                  />
+                ))
+              ) : (
+                <p className="latexgo-empty">No matching formulas</p>
+              )}
             </div>
-          </div>
+          </section>
+        </aside>
 
-          <div className="latexgo-controls">
-            <label htmlFor="latexgo-sidebar-search">
-              Search
-              <input
-                id="latexgo-sidebar-search"
-                type="search"
-                value={latexgoSearch}
-                onChange={(event) => setLaTeXgOSearch(event.target.value)}
-                placeholder="maxwell, bayes, pid..."
-              />
-            </label>
-          </div>
-
-          <div className="latexgo-categories" aria-label="LaTeXgO categories">
-            {latexgoCategories.map((category) => (
-              <button
-                className={category === latexgoCategory ? 'active' : ''}
-                key={category}
-                type="button"
-                aria-pressed={category === latexgoCategory}
-                onClick={() => setLaTeXgOCategory(category)}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-
-          <p className="latexgo-count" aria-live="polite">
-            {`${filteredLaTeXgOFormulas.length} result${
-              filteredLaTeXgOFormulas.length === 1 ? '' : 's'
-            }`}
-          </p>
-
-          <div className="latexgo-list" aria-live="polite">
-            {filteredLaTeXgOFormulas.length > 0 ? (
-              filteredLaTeXgOFormulas.map((formula) => (
-                <LaTeXgOFormulaCard
-                  formula={formula}
-                  key={formula.id}
-                  onUse={insertLaTeXgOFormula}
-                />
-              ))
-            ) : (
-              <p className="latexgo-empty">No matching formulas</p>
-            )}
-          </div>
-        </section>
-      </aside>
-
-      <section className="editor-pane" aria-labelledby="editor-title">
-        <div className="app-header">
-          <div>
-            <p className="eyebrow">InstaTex</p>
-            <h1 id="editor-title">InstaTex</h1>
-          </div>
-          <button type="button" className="secondary-button" onClick={() => navigate('/latexgo')}>
-            LaTeXgO
-          </button>
-        </div>
-
+        <section className="editor-pane" aria-label="instaTeX editor">
         <div className="symbol-strip" aria-label="Symbol templates">
           {toolbarGroups.map((group) => (
             <section className="github-symbol-group" key={group.name} aria-label={group.name}>
@@ -1223,7 +1133,7 @@ function App() {
         <section className="export-panel" aria-label="Export options">
           <div className="export-row">
             <div className="export-section-title">
-              <h2>Download</h2>
+              <h2>Export</h2>
             </div>
             <label htmlFor="export-background">
               Background
@@ -1250,21 +1160,13 @@ function App() {
                 />
               </label>
             ) : null}
-            <div className="export-actions">
+            <div className="export-actions export-actions-inline">
               <button type="button" onClick={downloadSvg} disabled={!canExport}>
-                SVG
+                Download SVG
               </button>
               <button type="button" onClick={downloadPng} disabled={!canExport}>
-                PNG
+                Download PNG
               </button>
-            </div>
-          </div>
-
-          <div className="export-row">
-            <div className="export-section-title">
-              <h2>Copy</h2>
-            </div>
-            <div className="export-actions">
               <button type="button" onClick={copyLatex}>
                 {copied === 'latex' ? 'Copied' : 'Copy LaTeX'}
               </button>
@@ -1294,7 +1196,8 @@ function App() {
         </div>
 
         {error ? <p className="error-message">{error}</p> : null}
-      </section>
+        </section>
+      </div>
     </main>
   )
 }
