@@ -8,8 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate:symbols": "node scripts/generate-symbol-assets.mjs",
-    "validate:latexgo": "node scripts/validate-latexgo.mjs"
+    "generate:symbols": "node scripts/generate-symbol-assets.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.1",
@@ -19,6 +18,7 @@
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.41.1",
     "fuse.js": "^7.3.0",
+    "latexgo": "file:../LaTeXgO/catalog",
     "mathjax": "^4.1.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"

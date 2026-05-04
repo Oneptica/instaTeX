@@ -14,25 +14,13 @@ export type LatexGroup = {
   templates: LatexTemplate[]
 }
 
-export type LaTeXgOFormula = {
-  id: string
-  title: string
-  category: string
-  subcategory?: string
-  latex: string
-  description?: string
-  tags: string[]
-  source?: string
-}
+import { type FormulaEntry } from 'latexgo'
 
-const latexgoFormulaModules = import.meta.glob('../../LaTeXgO/formulas/**/*.json', {
-  eager: true,
-  import: 'default',
-}) as Record<string, LaTeXgOFormula[]>
+export type LaTeXgOFormula = FormulaEntry
 
-export const latexgoFormulas = Object.entries(latexgoFormulaModules)
-  .sort(([left], [right]) => left.localeCompare(right))
-  .flatMap(([, formulas]) => formulas)
+import { formulas as rawFormulas } from 'latexgo'
+
+export const latexgoFormulas = rawFormulas
 
 function formulasToTemplates(categories: string[]): LatexTemplate[] {
   return latexgoFormulas
