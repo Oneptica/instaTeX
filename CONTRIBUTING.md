@@ -2,7 +2,7 @@
 
 Thanks for considering a contribution.
 
-The best first contribution is usually a LaTeXgO formula entry. LaTeXgO lives in `LaTeXgO/` and is the open formula library used by InstaTex.
+The best first contribution is usually a LaTeXgO formula entry. LaTeXgO lives in `LaTeXgO/` and is the open formula library used by instaTeX.
 
 ## Formula Contributions
 
@@ -40,4 +40,4 @@ The validator checks JSON shape, required fields, duplicate IDs, supported categ
 
 LaTeXgO formula data is licensed in the LaTeXgO repository. See `LaTeXgO/README.md` for the current terms.
 
-InstaTex application code licensing is controlled separately by the project owner.
+instaTeX application code licensing is controlled separately by the project owner.

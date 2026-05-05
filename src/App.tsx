@@ -27,10 +27,10 @@ function TopBar() {
   return (
     <header className="site-topbar" aria-label="Primary">
       <div className="site-topbar-inner">
-        <a className="site-topbar-link active" href="/">InstaTeX</a>
+        <a className="site-topbar-link active" href="/">instaTeX</a>
         <a
           className="site-topbar-link"
-          href="https://github.com/tzhaoo/InstaTeX"
+          href="https://github.com/tzhaoo/instaTeX"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="GitHub"
@@ -201,7 +201,7 @@ function TemplateButtonLabel({
 }
 
 function BrandLogo() {
-  return <img className="page-brand-logo page-brand-logo-editor" src="/instatex.svg" alt="InstaTex" />
+  return <img className="page-brand-logo page-brand-logo-editor" src="/instatex.svg" alt="instaTeX" />
 }
 
 const latexgoPreviewOptions: RenderOptions = {
