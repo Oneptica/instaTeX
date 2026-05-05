@@ -1001,8 +1001,8 @@ function App() {
         <section className="editor-pane" aria-label="instaTeX editor">
         <div className="symbol-strip" aria-label="Symbol templates">
           {toolbarGroups.map((group) => (
-            <section className="github-symbol-group" key={group.name}>
-              <div className="github-symbol-preview">
+            <section className="toolbar-group" key={group.name}>
+              <div className="toolbar-preview">
                 {group.templates.slice(0, visibleToolbarTemplateCount).map((template, index) => (
                   <button
                     key={`${group.name}-preview-${template.label}-${template.prefix}`}
@@ -1021,7 +1021,7 @@ function App() {
                 ))}
               </div>
               {group.templates.length > visibleToolbarTemplateCount ? (
-                <div className="github-symbol-popover">
+                <div className="toolbar-popover">
                   {group.templates.slice(visibleToolbarTemplateCount).map((template, index) => {
                     const templateIndex = index + visibleToolbarTemplateCount
 
@@ -1052,8 +1052,8 @@ function App() {
           TeX input
         </label>
 
-        <div className="github-input-header" aria-label="TeX editor toolbar">
-          <div className="github-toolbar" aria-label="Editor commands">
+        <div className="toolbar-header" aria-label="TeX editor toolbar">
+          <div className="toolbar" aria-label="Editor commands">
             <button type="button" title="Undo" onClick={undoLatex} disabled={!canUndo}>
               Undo
             </button>
@@ -1063,14 +1063,14 @@ function App() {
             <button type="button" onClick={resetLatex}>
               Clear
             </button>
-            <span className="github-divider" aria-hidden="true" />
+            <span className="toolbar-divider" aria-hidden="true" />
             <button type="button" onClick={() => renderFormula()} disabled={isRendering}>
               {isRendering ? 'Rendering' : 'Render'}
             </button>
             <button type="button" onClick={removeLineBreaks}>
               One line
             </button>
-            <span className="github-divider" aria-hidden="true" />
+            <span className="toolbar-divider" aria-hidden="true" />
             <label className="toolbar-checkbox">
               <input
                 type="checkbox"
@@ -1095,11 +1095,11 @@ function App() {
                 ))}
               </select>
             </label>
-            <span className="github-divider" aria-hidden="true" />
+            <span className="toolbar-divider" aria-hidden="true" />
             {inputOptionGroups.map((group) => (
-              <details className="github-menu" key={group.name}>
+              <details className="toolbar-menu" key={group.name}>
                 <summary>{group.name}</summary>
-                <div className="github-menu-panel">
+                <div className="toolbar-menu-panel">
                   {group.templates.map((template) => (
                     <button
                       key={`${group.name}-${template.label}-${template.prefix}-${template.suffix ?? ''}`}
@@ -1116,9 +1116,9 @@ function App() {
                 </div>
               </details>
             ))}
-            <details className="github-menu github-matrix-menu">
+            <details className="toolbar-menu toolbar-matrix-menu">
               <summary>Matrix</summary>
-              <div className="github-menu-panel">
+              <div className="toolbar-menu-panel">
                 <label htmlFor="matrix-type">
                   Type
                   <select

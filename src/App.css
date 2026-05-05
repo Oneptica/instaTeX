@@ -522,7 +522,7 @@
   font: 13px/1.4 var(--sans);
 }
 
-.github-input-header {
+.toolbar-header {
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -533,7 +533,7 @@
   background: #f6f8fa;
 }
 
-.github-toolbar {
+.toolbar {
   min-width: 0;
   display: flex;
   flex: 1 1 auto;
@@ -543,8 +543,8 @@
   align-items: center;
 }
 
-.github-toolbar button,
-.github-menu summary {
+.toolbar button,
+.toolbar-menu summary {
   min-height: 28px;
   padding: 0 8px;
   border: 1px solid transparent;
@@ -555,13 +555,13 @@
   cursor: pointer;
 }
 
-.github-toolbar button:hover:not(:disabled),
-.github-menu summary:hover {
+.toolbar button:hover:not(:disabled),
+.toolbar-menu summary:hover {
   color: #24292f;
   background: #eaedf0;
 }
 
-.github-divider {
+.toolbar-divider {
   width: 1px;
   height: 18px;
   margin: 0 4px;
@@ -617,21 +617,21 @@
   cursor: not-allowed;
 }
 
-.github-menu {
+.toolbar-menu {
   position: relative;
 }
 
-.github-menu summary {
+.toolbar-menu summary {
   display: flex;
   align-items: center;
   list-style: none;
 }
 
-.github-menu summary::-webkit-details-marker {
+.toolbar-menu summary::-webkit-details-marker {
   display: none;
 }
 
-.github-menu summary::after {
+.toolbar-menu summary::after {
   content: '';
   width: 0;
   height: 0;
@@ -641,7 +641,7 @@
   border-top: 5px solid currentColor;
 }
 
-.github-menu-panel {
+.toolbar-menu-panel {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
@@ -658,7 +658,7 @@
   box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
 }
 
-.github-menu-panel button {
+.toolbar-menu-panel button {
   min-height: 30px;
   display: inline-flex;
   gap: 7px;
@@ -670,7 +670,7 @@
   font-size: 12px;
 }
 
-.github-menu-panel button:hover:not(:disabled) {
+.toolbar-menu-panel button:hover:not(:disabled) {
   border-color: var(--border-strong);
   background: #f6f8fa;
 }
@@ -688,7 +688,7 @@
   max-width: 100%;
 }
 
-.github-symbol-group {
+.toolbar-group {
   position: relative;
   width: 136px;
   min-height: 58px;
@@ -701,7 +701,7 @@
   background: transparent;
 }
 
-.github-symbol-group p {
+.toolbar-group p {
   margin: 0;
   color: var(--muted);
   font: 500 12px/1.2 var(--sans);
@@ -710,27 +710,27 @@
   white-space: nowrap;
 }
 
-.github-symbol-preview,
-.github-symbol-popover {
+.toolbar-preview,
+.toolbar-popover {
   flex-wrap: wrap;
   gap: 4px;
   min-width: 0;
 }
 
-.github-symbol-preview {
+.toolbar-preview {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   width: 100%;
 }
 
-.github-symbol-popover {
+.toolbar-popover {
   display: none;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   width: 100%;
 }
 
-.github-symbol-preview button,
-.github-symbol-popover button {
+.toolbar-preview button,
+.toolbar-popover button {
   width: 100%;
   height: 26px;
   display: inline-flex;
@@ -759,7 +759,7 @@
   object-fit: contain;
 }
 
-.github-symbol-popover {
+.toolbar-popover {
   position: absolute;
   top: 100%;
   left: -1px;
@@ -772,7 +772,7 @@
   background: #ffffff;
 }
 
-.github-symbol-group button {
+.toolbar-group button {
   width: 100%;
   height: 26px;
   padding: 0;
@@ -784,29 +784,29 @@
   justify-content: center;
 }
 
-.github-symbol-group button:hover:not(:disabled) {
+.toolbar-group button:hover:not(:disabled) {
   border-color: transparent;
   background: #f6f8fa;
 }
 
-.github-symbol-group:hover,
-.github-symbol-group:focus-within {
+.toolbar-group:hover,
+.toolbar-group:focus-within {
   border-color: var(--border);
   border-bottom-color: transparent;
   border-radius: var(--radius) var(--radius) 0 0;
   background: #ffffff;
 }
 
-.github-symbol-group:hover .github-symbol-popover,
-.github-symbol-group:focus-within .github-symbol-popover {
+.toolbar-group:hover .toolbar-popover,
+.toolbar-group:focus-within .toolbar-popover {
   display: grid;
 }
 
-.github-matrix-menu .github-menu-panel {
+.toolbar-matrix-menu .toolbar-menu-panel {
   width: 330px;
 }
 
-.github-matrix-menu label {
+.toolbar-matrix-menu label {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -814,7 +814,7 @@
   font: 500 12px/1.2 var(--sans);
 }
 
-.github-matrix-menu select {
+.toolbar-matrix-menu select {
   width: auto;
   min-width: 108px;
   min-height: 30px;
@@ -823,7 +823,7 @@
   font-size: 13px;
 }
 
-.github-matrix-menu input[type='number'] {
+.toolbar-matrix-menu input[type='number'] {
   width: 56px;
   min-height: 30px;
   padding: 0 8px;
@@ -849,7 +849,7 @@
   tab-size: 2;
 }
 
-.github-input-header + .editor-frame .cm-editor {
+.toolbar-header + .editor-frame .cm-editor {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
@@ -1380,7 +1380,7 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
-  .github-symbol-group {
+  .toolbar-group {
     width: 136px;
   }
 
