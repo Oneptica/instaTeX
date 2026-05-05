@@ -22,32 +22,7 @@ import { formulas as rawFormulas } from 'latexgo'
 
 export const latexgoFormulas = rawFormulas
 
-function formulasToTemplates(categories: string[]): LatexTemplate[] {
-  return latexgoFormulas
-    .filter((formula) => categories.includes(formula.category))
-    .map((formula) => ({
-      label: formula.title,
-      description: [formula.subcategory, formula.description].filter(Boolean).join(' - '),
-      prefix: formula.latex,
-    }))
-}
-
 export const toolbarGroups = toolbarGroupsData as LatexGroup[]
-
-export const functionTemplates: LatexTemplate[] = [
-  { label: 'ln', prefix: '\\ln ' },
-  { label: 'log', prefix: '\\log ' },
-  { label: 'exp', prefix: '\\exp ' },
-  { label: 'sin', prefix: '\\sin ' },
-  { label: 'cos', prefix: '\\cos ' },
-  { label: 'tan', prefix: '\\tan ' },
-  { label: 'arcsin', prefix: '\\arcsin ' },
-  { label: 'arccos', prefix: '\\arccos ' },
-  { label: 'arctan', prefix: '\\arctan ' },
-  { label: 'det', prefix: '\\det ' },
-  { label: 'dim', prefix: '\\dim ' },
-  { label: 'ker', prefix: '\\ker ' },
-]
 
 export const colorTemplates: LatexTemplate[] = [
   { label: 'Red', prefix: '\\color{Red} ', swatch: '#d1242f' },
@@ -89,17 +64,3 @@ export const sizeTemplates: LatexTemplate[] = [
   { label: 'tiny', prefix: '\\tiny ' },
 ]
 
-export const exampleTemplates = formulasToTemplates([
-  'Algebra',
-  'Calculus',
-  'Linear Algebra',
-  'Probability',
-])
-
-export const scienceTemplates = formulasToTemplates(['Physics', 'Chemistry'])
-
-export const pairedCharacters: Record<string, string> = {
-  '(': ')',
-  '[': ']',
-  '{': '}',
-}

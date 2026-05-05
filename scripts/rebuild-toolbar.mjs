@@ -1,0 +1,282 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
+// All symbols from current + reference, organized cleanly
+const data = [
+
+  // 1. Structure — building blocks
+  {
+    name: 'Structure',
+    templates: [
+      { label: 'xⁿ', description: 'Superscript', prefix: '^{', suffix: '}' },
+      { label: 'xₙ', description: 'Subscript', prefix: '_{', suffix: '}' },
+      { label: '√x', description: 'Square root', prefix: '\\sqrt{', suffix: '}' },
+      { label: '∛x', description: 'Cube root', prefix: '\\sqrt[3]{', suffix: '}' },
+      { label: 'a⁄b', description: 'Fraction', prefix: '\\frac{', suffix: '}{}', tabStops: [6, 8] },
+      { label: 'binom', description: 'Binomial', prefix: '\\binom{', suffix: '}{}', tabStops: [7, 9] },
+      { label: 'over', description: 'Overset', prefix: '\\overset{', suffix: '}{}', tabStops: [9, 11] },
+      { label: 'under', description: 'Underset', prefix: '\\underset{', suffix: '}{}', tabStops: [10, 12] },
+      { label: 'text', description: 'Text', prefix: '\\text{', suffix: '}' },
+    ]
+  },
+
+  // 2. Large operators — sums, integrals, limits
+  {
+    name: 'Large Operators',
+    templates: [
+      { label: '∑', description: 'Sum', prefix: '\\sum_{', suffix: '}^{}', tabStops: [6, 9] },
+      { label: '∏', description: 'Product', prefix: '\\prod_{', suffix: '}^{}', tabStops: [7, 10] },
+      { label: '∫', description: 'Indefinite integral', prefix: '\\int ' },
+      { label: '∫ᵇₐ', description: 'Definite integral', prefix: '\\int_{a}^{b} ', tabStops: [6, 10] },
+      { label: '∬', description: 'Double integral', prefix: '\\iint ' },
+      { label: '∭', description: 'Triple integral', prefix: '\\iiint ' },
+      { label: '∮', description: 'Contour integral', prefix: '\\oint ' },
+      { label: 'lim', description: 'Limit', prefix: '\\lim_{x \\to 0} ' },
+      { label: 'limsup', description: 'Limit superior', prefix: '\\limsup ' },
+      { label: 'liminf', description: 'Limit inferior', prefix: '\\liminf ' },
+      { label: 'd/dx', description: 'Derivative', prefix: '\\frac{d}{dx} ' },
+      { label: '∂/∂x', description: 'Partial derivative', prefix: '\\frac{\\partial}{\\partial x} ' },
+      { label: '∇', description: 'Nabla', prefix: '\\nabla ' },
+      { label: '∂', description: 'Partial', prefix: '\\partial ' },
+    ]
+  },
+
+  // 3. Functions
+  {
+    name: 'Functions',
+    templates: [
+      { label: 'sin', description: 'Sine', prefix: '\\sin ' },
+      { label: 'cos', description: 'Cosine', prefix: '\\cos ' },
+      { label: 'tan', description: 'Tangent', prefix: '\\tan ' },
+      { label: 'cot', description: 'Cotangent', prefix: '\\cot ' },
+      { label: 'sec', description: 'Secant', prefix: '\\sec ' },
+      { label: 'csc', description: 'Cosecant', prefix: '\\csc ' },
+      { label: 'arcsin', description: 'Arcsine', prefix: '\\arcsin ' },
+      { label: 'arccos', description: 'Arccosine', prefix: '\\arccos ' },
+      { label: 'arctan', description: 'Arctangent', prefix: '\\arctan ' },
+      { label: 'sinh', description: 'Hyperbolic sine', prefix: '\\sinh ' },
+      { label: 'cosh', description: 'Hyperbolic cosine', prefix: '\\cosh ' },
+      { label: 'tanh', description: 'Hyperbolic tangent', prefix: '\\tanh ' },
+      { label: 'log', description: 'Logarithm', prefix: '\\log ' },
+      { label: 'ln', description: 'Natural log', prefix: '\\ln ' },
+      { label: 'exp', description: 'Exponential', prefix: '\\exp ' },
+      { label: 'det', description: 'Determinant', prefix: '\\det ' },
+      { label: 'gcd', description: 'GCD', prefix: '\\gcd ' },
+      { label: 'max', description: 'Maximum', prefix: '\\max ' },
+      { label: 'min', description: 'Minimum', prefix: '\\min ' },
+      { label: 'Pr', description: 'Probability', prefix: '\\Pr ' },
+    ]
+  },
+
+  // 4. Greek
+  {
+    name: 'Greek',
+    templates: [
+      { label: 'α', description: 'alpha', prefix: '\\alpha ' },
+      { label: 'β', description: 'beta', prefix: '\\beta ' },
+      { label: 'γ', description: 'gamma', prefix: '\\gamma ' },
+      { label: 'δ', description: 'delta', prefix: '\\delta ' },
+      { label: 'ε', description: 'epsilon', prefix: '\\epsilon ' },
+      { label: 'ϵ', description: 'varepsilon', prefix: '\\varepsilon ' },
+      { label: 'ζ', description: 'zeta', prefix: '\\zeta ' },
+      { label: 'η', description: 'eta', prefix: '\\eta ' },
+      { label: 'θ', description: 'theta', prefix: '\\theta ' },
+      { label: 'ϑ', description: 'vartheta', prefix: '\\vartheta ' },
+      { label: 'ι', description: 'iota', prefix: '\\iota ' },
+      { label: 'κ', description: 'kappa', prefix: '\\kappa ' },
+      { label: 'ϰ', description: 'varkappa', prefix: '\\varkappa ' },
+      { label: 'λ', description: 'lambda', prefix: '\\lambda ' },
+      { label: 'μ', description: 'mu', prefix: '\\mu ' },
+      { label: 'ν', description: 'nu', prefix: '\\nu ' },
+      { label: 'ξ', description: 'xi', prefix: '\\xi ' },
+      { label: 'ο', description: 'omicron', prefix: '\\omicron ' },
+      { label: 'π', description: 'pi', prefix: '\\pi ' },
+      { label: 'ϖ', description: 'varpi', prefix: '\\varpi ' },
+      { label: 'ρ', description: 'rho', prefix: '\\rho ' },
+      { label: 'ϱ', description: 'varrho', prefix: '\\varrho ' },
+      { label: 'σ', description: 'sigma', prefix: '\\sigma ' },
+      { label: 'ς', description: 'varsigma', prefix: '\\varsigma ' },
+      { label: 'τ', description: 'tau', prefix: '\\tau ' },
+      { label: 'υ', description: 'upsilon', prefix: '\\upsilon ' },
+      { label: 'φ', description: 'phi', prefix: '\\phi ' },
+      { label: 'ψ', description: 'psi', prefix: '\\psi ' },
+      { label: 'ω', description: 'omega', prefix: '\\omega ' },
+      { label: 'Γ', description: 'Gamma', prefix: '\\Gamma ' },
+      { label: 'Δ', description: 'Delta', prefix: '\\Delta ' },
+      { label: 'Θ', description: 'Theta', prefix: '\\Theta ' },
+      { label: 'Λ', description: 'Lambda', prefix: '\\Lambda ' },
+      { label: 'Ξ', description: 'Xi', prefix: '\\Xi ' },
+      { label: 'Π', description: 'Pi', prefix: '\\Pi ' },
+      { label: 'Σ', description: 'Sigma', prefix: '\\Sigma ' },
+      { label: 'Φ', description: 'Phi', prefix: '\\Phi ' },
+      { label: 'Ψ', description: 'Psi', prefix: '\\Psi ' },
+      { label: 'Ω', description: 'Omega', prefix: '\\Omega ' },
+    ]
+  },
+
+  // 5. Relations
+  {
+    name: 'Relations',
+    templates: [
+      { label: '=', description: 'Equal', prefix: ' = ' },
+      { label: '≠', description: 'Not equal', prefix: '\\neq ' },
+      { label: '≈', description: 'Approximately', prefix: '\\approx ' },
+      { label: '≡', description: 'Equivalent', prefix: '\\equiv ' },
+      { label: '≅', description: 'Congruent', prefix: '\\cong ' },
+      { label: '≃', description: 'Asymptotically equal', prefix: '\\simeq ' },
+      { label: '≤', description: 'Less than or equal', prefix: '\\leq ' },
+      { label: '≥', description: 'Greater than or equal', prefix: '\\geq ' },
+      { label: '≪', description: 'Much less than', prefix: '\\ll ' },
+      { label: '≫', description: 'Much greater than', prefix: '\\gg ' },
+      { label: '⊂', description: 'Subset', prefix: '\\subset ' },
+      { label: '⊆', description: 'Subset or equal', prefix: '\\subseteq ' },
+      { label: '⊄', description: 'Not subset', prefix: '\\nsubseteq ' },
+      { label: '⊇', description: 'Superset', prefix: '\\supseteq ' },
+      { label: '∈', description: 'Element of', prefix: '\\in ' },
+      { label: '∉', description: 'Not in', prefix: '\\notin ' },
+      { label: '∪', description: 'Union', prefix: '\\cup ' },
+      { label: '∩', description: 'Intersection', prefix: '\\cap ' },
+      { label: '∧', description: 'And', prefix: '\\wedge ' },
+      { label: '∨', description: 'Or', prefix: '\\vee ' },
+      { label: '∀', description: 'For all', prefix: '\\forall ' },
+      { label: '∃', description: 'Exists', prefix: '\\exists ' },
+      { label: '∅', description: 'Empty set', prefix: '\\emptyset ' },
+      { label: '¬', description: 'Not', prefix: '\\neg ' },
+      { label: '∴', description: 'Therefore', prefix: '\\therefore ' },
+      { label: '∵', description: 'Because', prefix: '\\because ' },
+      { label: '∥', description: 'Parallel', prefix: '\\parallel ' },
+      { label: '⊥', description: 'Perpendicular', prefix: '\\perp ' },
+      { label: '∼', description: 'Similar', prefix: '\\sim ' },
+      { label: '∝', description: 'Proportional', prefix: '\\propto ' },
+      { label: '⊢', description: 'Proves', prefix: '\\vdash ' },
+      { label: '⊨', description: 'Models', prefix: '\\models ' },
+    ]
+  },
+
+  // 6. Arrows
+  {
+    name: 'Arrows',
+    templates: [
+      { label: '→', description: 'Right arrow', prefix: '\\rightarrow ' },
+      { label: '←', description: 'Left arrow', prefix: '\\leftarrow ' },
+      { label: '↔', description: 'Left-right arrow', prefix: '\\leftrightarrow ' },
+      { label: '⇒', description: 'Rightarrow', prefix: '\\Rightarrow ' },
+      { label: '⇐', description: 'Leftarrow', prefix: '\\Leftarrow ' },
+      { label: '⇔', description: 'Leftrightarrow', prefix: '\\Leftrightarrow ' },
+      { label: '⟶', description: 'Long right arrow', prefix: '\\longrightarrow ' },
+      { label: '⟵', description: 'Long left arrow', prefix: '\\longleftarrow ' },
+      { label: '⟷', description: 'Long left-right', prefix: '\\longleftrightarrow ' },
+      { label: '⟹', description: 'Longrightarrow', prefix: '\\Longrightarrow ' },
+      { label: '⟸', description: 'Longleftarrow', prefix: '\\Longleftarrow ' },
+      { label: '↦', description: 'Mapsto', prefix: '\\mapsto ' },
+      { label: '⟼', description: 'Long mapsto', prefix: '\\longmapsto ' },
+      { label: '↑', description: 'Up arrow', prefix: '\\uparrow ' },
+      { label: '↓', description: 'Down arrow', prefix: '\\downarrow ' },
+      { label: '↕', description: 'Up-down arrow', prefix: '\\updownarrow ' },
+      { label: '⇑', description: 'Uparrow', prefix: '\\Uparrow ' },
+      { label: '⇓', description: 'Downarrow', prefix: '\\Downarrow ' },
+      { label: '⇕', description: 'Updownarrow', prefix: '\\Updownarrow ' },
+      { label: '↗', description: 'Northeast arrow', prefix: '\\nearrow ' },
+      { label: '↘', description: 'Southeast arrow', prefix: '\\searrow ' },
+      { label: '↖', description: 'Northwest arrow', prefix: '\\nwarrow ' },
+      { label: '↙', description: 'Southwest arrow', prefix: '\\swarrow ' },
+      { label: '⇌', description: 'Harpoons', prefix: '\\rightleftharpoons ' },
+    ]
+  },
+
+  // 7. Brackets
+  {
+    name: 'Brackets',
+    templates: [
+      { label: '( )', description: 'Parentheses', prefix: '\\left( ', suffix: ' \\right)' },
+      { label: '[ ]', description: 'Brackets', prefix: '\\left[ ', suffix: ' \\right]' },
+      { label: '{ }', description: 'Braces', prefix: '\\left\\{ ', suffix: ' \\right\\}' },
+      { label: '| |', description: 'Absolute bars', prefix: '\\left| ', suffix: ' \\right|' },
+      { label: '‖ ‖', description: 'Norm bars', prefix: '\\left\\| ', suffix: ' \\right\\|' },
+      { label: '⌊ ⌋', description: 'Floor', prefix: '\\left\\lfloor ', suffix: ' \\right\\rfloor' },
+      { label: '⌈ ⌉', description: 'Ceil', prefix: '\\left\\lceil ', suffix: ' \\right\\rceil' },
+      { label: '⟨ ⟩', description: 'Angle brackets', prefix: '\\left\\langle ', suffix: ' \\right\\rangle' },
+    ]
+  },
+
+  // 8. Accents
+  {
+    name: 'Accents',
+    templates: [
+      { label: 'x̂', description: 'Hat', prefix: '\\hat{', suffix: '}' },
+      { label: 'x̃', description: 'Tilde', prefix: '\\tilde{', suffix: '}' },
+      { label: 'x̄', description: 'Bar', prefix: '\\bar{', suffix: '}' },
+      { label: 'ẍ', description: 'Ddot', prefix: '\\ddot{', suffix: '}' },
+      { label: 'x⃗', description: 'Vector arrow', prefix: '\\vec{', suffix: '}' },
+      { label: 'x̅', description: 'Overline', prefix: '\\overline{', suffix: '}' },
+      { label: 'x̲', description: 'Underline', prefix: '\\underline{', suffix: '}' },
+      { label: '⏞', description: 'Overbrace', prefix: '\\overbrace{', suffix: '}^{}', tabStops: [11, 14] },
+      { label: '⏟', description: 'Underbrace', prefix: '\\underbrace{', suffix: '}_{ }', tabStops: [12, 15] },
+    ]
+  },
+
+  // 9. Symbols
+  {
+    name: 'Symbols',
+    templates: [
+      { label: '±', description: 'Plus-minus', prefix: '\\pm ' },
+      { label: '∓', description: 'Minus-plus', prefix: '\\mp ' },
+      { label: '×', description: 'Times', prefix: '\\times ' },
+      { label: '÷', description: 'Division', prefix: '\\div ' },
+      { label: '·', description: 'Dot product', prefix: '\\cdot ' },
+      { label: '∞', description: 'Infinity', prefix: '\\infty ' },
+      { label: '⋯', description: 'Centered ellipsis', prefix: '\\cdots ' },
+      { label: '⋮', description: 'Vertical ellipsis', prefix: '\\vdots ' },
+      { label: '⋱', description: 'Diagonal ellipsis', prefix: '\\ddots ' },
+      { label: '⊕', description: 'Direct sum', prefix: '\\oplus ' },
+      { label: '⊗', description: 'Tensor product', prefix: '\\otimes ' },
+      { label: '⊙', description: 'Circled dot', prefix: '\\odot ' },
+      { label: '⊖', description: 'Circled minus', prefix: '\\ominus ' },
+      { label: '∘', description: 'Composition', prefix: '\\circ ' },
+      { label: '•', description: 'Bullet', prefix: '\\bullet ' },
+      { label: '★', description: 'Star', prefix: '\\star ' },
+      { label: '∠', description: 'Angle', prefix: '\\angle ' },
+      { label: '∡', description: 'Measured angle', prefix: '\\measuredangle ' },
+      { label: '∘', description: 'Degree', prefix: '\\degree ' },
+      { label: '′', description: 'Prime', prefix: '\\prime ' },
+      { label: 'ℏ', description: 'h-bar', prefix: '\\hbar ' },
+      { label: 'ℜ', description: 'Real part', prefix: '\\Re ' },
+      { label: 'ℑ', description: 'Imaginary part', prefix: '\\Im ' },
+      { label: 'ℕ', description: 'Natural numbers', prefix: '\\mathbb{N} ' },
+      { label: 'ℤ', description: 'Integers', prefix: '\\mathbb{Z} ' },
+      { label: 'ℚ', description: 'Rational numbers', prefix: '\\mathbb{Q} ' },
+      { label: 'ℝ', description: 'Real numbers', prefix: '\\mathbb{R} ' },
+      { label: 'ℂ', description: 'Complex numbers', prefix: '\\mathbb{C} ' },
+      { label: '♢', description: 'Diamond', prefix: '\\Diamond ' },
+      { label: '□', description: 'Square', prefix: '\\square ' },
+      { label: '△', description: 'Triangle', prefix: '\\triangle ' },
+      { label: '◁', description: 'Triangle left', prefix: '\\triangleleft ' },
+      { label: '▷', description: 'Triangle right', prefix: '\\triangleright ' },
+      { label: '◯', description: 'Big circle', prefix: '\\bigcirc ' },
+      { label: '∖', description: 'Set minus', prefix: '\\setminus ' },
+      { label: '∁', description: 'Complement', prefix: '\\complement ' },
+    ]
+  },
+
+  // 10. Physics & Chemistry
+  {
+    name: 'Physics & Chemistry',
+    templates: [
+      { label: '⟨ψ|', description: 'Bra', prefix: '\\bra{', suffix: '}' },
+      { label: '|ψ⟩', description: 'Ket', prefix: '\\ket{', suffix: '}' },
+      { label: '⟨ψ|φ⟩', description: 'Braket', prefix: '\\braket{', suffix: '}' },
+      { label: '|x|', description: 'Absolute value', prefix: '\\abs{', suffix: '}' },
+      { label: '𝐯', description: 'Bold vector', prefix: '\\mathbf{', suffix: '}' },
+      { label: 'd⁄dx', description: 'Derivative', prefix: '\\dv{', suffix: '}{x}', tabStops: [4, 6] },
+      { label: '∂⁄∂x', description: 'Partial derivative', prefix: '\\pdv{', suffix: '}{x}', tabStops: [5, 7] },
+      { label: 'x⃗', description: 'Vector arrow', prefix: '\\overrightarrow{', suffix: '}' },
+      { label: 'H₂O', description: 'Chemistry', prefix: '\\ce{', suffix: '}' },
+      { label: 'x̸', description: 'Cancel', prefix: '\\cancel{', suffix: '}' },
+    ]
+  },
+]
+
+const outPath = process.argv[2] || path.resolve(path.dirname(import.meta.filename), '..', 'src/lib/toolbarGroups.json')
+fs.writeFileSync(outPath, JSON.stringify(data, null, 2))
+const total = data.reduce((s, g) => s + g.templates.length, 0)
+console.log(`Written ${data.length} groups, ${total} templates to ${outPath}`)

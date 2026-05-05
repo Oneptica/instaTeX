@@ -23,7 +23,17 @@ import {
 } from './lib/latexTemplates'
 import './App.css'
 
-const starterLatex = ''
+function getStarterLatex() {
+  if (window.location.hash) {
+    try {
+      return atob(window.location.hash.slice(1))
+    } catch {
+      return ''
+    }
+  }
+  return ''
+}
+const starterLatex = getStarterLatex()
 const visibleToolbarTemplateCount = 4
 
 const historyStorageKey = 'instatex.history'
@@ -192,8 +202,27 @@ function LaTeXgOFormulaCard({
   const previewRef = useRef<HTMLDivElement>(null)
   const [previewError, setPreviewError] = useState('')
   const [copied, setCopied] = useState(false)
+  const [rendered, setRendered] = useState(false)
 
   useEffect(() => {
+    const el = previewRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observer.disconnect()
+          setRendered(true)
+        }
+      },
+      { rootMargin: '200px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!rendered) return
     let cancelled = false
 
     const renderPreview = latexgoPreviewQueue.then(async () => {
@@ -215,7 +244,7 @@ function LaTeXgOFormulaCard({
     return () => {
       cancelled = true
     }
-  }, [formula.latex])
+  }, [formula.latex, rendered])
 
   async function copyFormulaCode() {
     try {
@@ -760,6 +789,15 @@ function App() {
     setCopied('latex')
   }
 
+  async function copyShareUrl() {
+    if (!latex) return
+
+    const url = new URL(window.location.href)
+    url.hash = btoa(latex)
+    await navigator.clipboard.writeText(url.toString())
+    setCopied('url')
+  }
+
   async function copySvg() {
     if (!canExport) return
 
@@ -941,8 +979,7 @@ function App() {
         <section className="editor-pane" aria-label="instaTeX editor">
         <div className="symbol-strip" aria-label="Symbol templates">
           {toolbarGroups.map((group) => (
-            <section className="github-symbol-group" key={group.name} aria-label={group.name}>
-              <p>{group.name}</p>
+            <section className="github-symbol-group" key={group.name}>
               <div className="github-symbol-preview">
                 {group.templates.slice(0, visibleToolbarTemplateCount).map((template, index) => (
                   <button
@@ -1172,6 +1209,9 @@ function App() {
               </button>
               <button type="button" onClick={copySvg} disabled={!canExport}>
                 {copied === 'svg' ? 'Copied' : 'Copy SVG'}
+              </button>
+              <button type="button" onClick={copyShareUrl}>
+                {copied === 'url' ? 'Copied' : 'Share'}
               </button>
             </div>
           </div>
