@@ -32,8 +32,12 @@
   border-radius: 999px;
   color: var(--muted);
   background: transparent;
-  font: 500 13px/1 var(--sans);
+  font: 500 13px var(--sans);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
 }
 
 .site-topbar-link:hover {
