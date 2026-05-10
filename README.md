@@ -6,7 +6,7 @@ A lightweight TeX equation editor for writing, previewing, and exporting formula
 - TeX autocomplete and syntax highlighting
 - SVG / PNG export
 - Symbol toolbar with 150+ templates
-- Formula library sidebar powered by [LaTeXgO](https://github.com/tzhaoo/LaTeXgO)
+- Formula library sidebar powered by [LaTeXgO](https://github.com/Oneptica/LaTeXGO)
 
 ## 🚀 Development
 

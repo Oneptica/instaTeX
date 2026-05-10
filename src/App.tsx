@@ -30,7 +30,7 @@ function TopBar() {
         <a className="site-topbar-link active" href="/">instaTeX</a>
         <a
           className="site-topbar-link"
-          href="https://github.com/tzhaoo/instaTeX"
+          href="https://github.com/Oneptica/instaTeX"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="GitHub"
