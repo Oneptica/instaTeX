@@ -16,7 +16,3 @@ npm run dev
 npm run build
 npm run generate:symbols    # regenerate toolbar icons
 ```
-
-## 📋 Requirements
-
-- Node.js 22+
