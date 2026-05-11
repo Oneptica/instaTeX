@@ -2,6 +2,8 @@
 
 A lightweight TeX equation editor for writing, previewing, and exporting formulas as SVG or PNG.
 
+**[instatex.oneptica.com](https://instatex.oneptica.com)**
+
 - MathJax-powered preview
 - TeX autocomplete and syntax highlighting
 - SVG / PNG export
