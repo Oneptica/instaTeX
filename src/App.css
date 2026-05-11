@@ -1407,6 +1407,9 @@ button:disabled {
   color: var(--muted);
   font: 400 14px/1.5 var(--sans);
 }
+.site-footer a {
+  color: inherit;
+}
 .site-footer p {
   margin: 0;
 }

@@ -1263,6 +1263,7 @@ function App() {
       </div>
       <footer className="site-footer">
         <p>Oneptica is committed to providing free, open-source web experiences with no ads and no tracking.</p>
+        <p><a href="mailto:dev@oneptica.com">dev@oneptica.com</a></p>
       </footer>
     </main>
   )
