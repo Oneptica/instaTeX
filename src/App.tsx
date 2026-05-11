@@ -1261,6 +1261,9 @@ function App() {
         {error ? <p className="error-message">{error}</p> : null}
         </section>
       </div>
+      <footer className="site-footer">
+        <p>Oneptica is committed to providing free, open-source web experiences with no ads and no tracking.</p>
+      </footer>
     </main>
   )
 }
